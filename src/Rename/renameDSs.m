@@ -1,7 +1,5 @@
 function renameDSs(sys)
 % RENAMEDSS Give all Data Store Memory, Read, and Write blocks with generic
-% names. This changes the "DataStoreName" parameter.
-% Does not take shadowing into account.
    
     datastores = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreMemory');
     renamed_writes = [];
@@ -13,7 +11,12 @@ function renameDSs(sys)
         reads  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreRead', 'DataStoreName', datastorename);
         
         % Memory
-        ds_name = ['DataStore' num2str(dsm)];
+        for i = 1:2^16
+            ds_name = ['DataStore' num2str(i)];
+            if ~ismember(ds_name, get_param(datastores, 'DataStoreName'))
+                break
+            end
+        end
         set_param(datastores{dsm}, 'DataStoreName', ds_name);
  
         % Write

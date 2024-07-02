@@ -48,6 +48,7 @@ function obfuscateModel(sys, parentSys, varargin)
     
     removecolorblocks       = getInput('removecolorblocks', varargin, default);
     removecolorannotations  = getInput('removecolorannotations', varargin, default);
+    removedialogparameters  = getInput('removeDialogParameters', varargin, default);
     
     %   Rename
     renameblocks            = getInput('renameblocks', varargin, default); 
@@ -132,6 +133,10 @@ function obfuscateModel(sys, parentSys, varargin)
     if removemodelinformation
         removeModelInformation(sys)
     end
+
+    if removedialogparameters
+        removeDialogParameters(sys)
+    end
     
     %removeCustomDataTypes(sys)  % will probably affect functionality
 
@@ -174,6 +179,4 @@ function obfuscateModel(sys, parentSys, varargin)
     if hideportlabels
         hidePortLabels(sys);
     end
-    
-    %renameLinks(sys)
 end

@@ -16,6 +16,8 @@ function renameConstants(sys)
             set_param(blocks{i}, 'OutDataTypeStr', 'Inherit: Inherit from ''Constant value''');
             
             % TODO: Should the workspace/data dictionary variable also be renamed?
+        else
+            set_param(blocks{i}, 'Value', '1');
         end
     end
 end
