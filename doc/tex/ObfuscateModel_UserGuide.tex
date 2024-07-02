@@ -22,6 +22,7 @@
 \input{macros}
 
 \newcommand{\ToolName}{Obfuscate Model Tool\@\xspace}
+\newcommand{\location}{\file{Location}\@\xspace}
 
 \newcommand{\menu}[2]{%
 	\ifthenelse{\equal{#1}{1}}{ObfuscateModelGUI}{}%
@@ -93,39 +94,32 @@ This section describes what must be done to setup the \ToolName, as well as how 
 \subsection{Prerequisites and Installation}
 
 \begin{enumerate}
-  \item Use \Matlab/\Simulink 2018b or newer.
-	\item To install the tool, use one of the following approaches:
+  \item Use \Matlab/\Simulink 2024a or newer.
+	\item To install the tool, use one of the following approaches to download all necessary files to some \location of your choice:
 	\begin{enumerate}
-		\item \textbf{Download the \file{.zip} from GitHub}
-		\begin{enumerate} 
-			\item Unzip the contents into your desired location. 
-			\item Add the unzipped folder and subfolders to your \mpath. 
-			\item Download the \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility} in the same manner. Add the folder and subfolders to your \mpath also. This is a dependency for the tool to work correctly.
-		\end{enumerate}
-		\item \textbf{Use the Git command line}
-		\begin{enumerate}
-			\item Use the following command to download the tool and any necessary submodules. 
+		\item Download the \file{.zip} files of the \href{https://github.com/lanpirot/Obfuscate-Model}{\ToolName repository} and for the dependency \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility}. Unzip both at \location.
+		\item Using a terminal at \location, clone the \ToolName repository and its dependency: 
 			\begin{verbatim}
 			git clone --recursive https://github.com/McSCert/Obfuscate-Model
+			git clone --recursive https://github.com/McSCert/Simulink-Utility
 			\end{verbatim}
-			\item Add the folder and subfolders to your \mpath. 
-		\end{enumerate}
-		\item \textbf{If you already have the files}
-		\begin{enumerate}
-			\item Add the tool folder and subfolders to your \mpath. 
-		\end{enumerate}
 	\end{enumerate}
-	%\item Run \href{https://www.mathworks.com/help/simulink/ug/registering-customizations.html}{sl\_refresh\_customizations} to refresh the Context Menu. 
-	\item Ensure your model is open and unlocked.
+	\item Add the \location of \ToolName and the dependency and all their subfolders to your \mpath. Do this step both for \ToolName and Simulink-Utility! To do this, use one of the following:
+	\begin{enumerate}
+		\item Use the \matlab current folder panel. Move to the location in the folder panel, then right-click on the folder $\longrightarrow$ Add to Path $\longrightarrow$ Selected Folders and Subfolders.
+		\item In the \matlab console, use \cmd{addpath(genpath('\location'))}
+	\end{enumerate}
+	\item Finally, to keep the path saved for the next \matlab start, use \cmd{savepath} in the \matlab console.
+	\item Ensure your \simulink model, you want to obfuscate, is open and unlocked.
 \end{enumerate}
 
-\paragraph{Troubleshooting:} If running the command ``\cmd{which ObfuscateModelGUI}'' indicates that the script is not found, then the tool needs to be added to the \mpath. For information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
+\paragraph{Troubleshooting:} If running the command ``\cmd{which ObfuscateModelGUI}'' indicates that the script is not found, or while executing the program \cmd{Unrecognized function or variable 'getInput'.} gets printed in the console, then the \ToolName and dependency directorie needs to be added to the \mpath. For more information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
 
 %---------------------------------------
 % How/when do you access the tool?
 %---------------------------------------
 \subsection{Getting Started}
-The tool can be launched by double-clicking the \file{ObfuscateModelGUI.mlapp} file, or by running the command \cmd{ObfuscateModelGUI} from the Command Window. This will open the Graphical User Interface (GUI) shown in \figurename~\ref{fig:contextMenu}.
+\ToolName can be launched by double-clicking the \file{ObfuscateModelGUI.mlapp} file, or by running the command \cmd{ObfuscateModelGUI} from the Command Window. This will open the Graphical User Interface (GUI) shown in \figurename~\ref{fig:contextMenu}.
 
 \begin{figure}[htb!]
 	\centering
@@ -139,14 +133,14 @@ The tool can be launched by double-clicking the \file{ObfuscateModelGUI.mlapp} f
 %---------------------------------------
 \newpage
 \subsection{Functionality}
-This section describes the tool functionality when being used from the GUI (Figure~\ref{fig:contextMenu}). Each section describes one of the groups of options in the GUI.
+This section describes the tool functionality when being used from the GUI (Figure~\ref{fig:contextMenu}). Each section describes one of the sub-panels of the GUI.
 
 \subsubsection{Recurse into Model References}
-This check-box will apply the removing (Section~\ref{lbl:remove}), renaming (Section~\ref{lbl:rename}), and hiding (Section~\ref{lbl:hide}) options inside of any referenced models.
+This check-box will apply the removing (Section~\ref{lbl:remove}), renaming (Section~\ref{lbl:rename}), and hiding (Section~\ref{lbl:hide}) options inside of any \href{https://de.mathworks.com/help/simulink/model-reference.html}{referenced models}.
 
 \subsubsection{Remove}
 \label{lbl:remove}
-The options in the \emph{Remove} group will discard elements of the model.
+The options in the \emph{Remove} panel will discard elements of the model.
 
 \begin{itemize}
 	\item Masks -- Block \href{https://www.mathworks.com/help/simulink/ug/block-masks.html}{masks} are commonly used to customize the block appearance of custom blocks. This option removes the masks of all blocks. 
@@ -179,7 +173,7 @@ The options in the \emph{Remove} group will discard elements of the model.
 
 \subsubsection{Rename}
 \label{lbl:rename}
-The options in the \emph{Rename} group will rename elements of the model to use generic names.
+The options in the \emph{Rename} panel will rename elements of the model to use generic names.
 
 \begin{itemize}
 	\item Block Names -- Each block in a model has a \param{name} that is typically displayed underneath the block. This option renames all block names to a generic name based on the block type. For example, an \inport block will be renamed to Inport1.
@@ -199,7 +193,7 @@ The options in the \emph{Rename} group will rename elements of the model to use 
 
 \subsubsection{Hide}
 \label{lbl:hide}
-The options in the \emph{Hide} group will hide elements of the model from view.
+The options in the \emph{Hide} panel will hide elements of the model from view.
 
 \begin{itemize}
 	\item Block Names -- This option hides the name of a block from view.
