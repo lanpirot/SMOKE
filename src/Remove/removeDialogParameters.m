@@ -10,7 +10,6 @@ function removeDialogParameters(sys)
 %   Side Effects:
 %       Resets all Dialog Parameters of all blocks.
 
-    % Lines
     block = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'block');
     for i = 1:length(block)
         % create a tmp block from which to steal the default parameter values
