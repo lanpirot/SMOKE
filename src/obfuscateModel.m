@@ -71,6 +71,9 @@ function obfuscateModel(sys, parentSys, varargin)
     sfevents                = getInput('sfevents', varargin, default);
     sfstates                = getInput('sfstates', varargin, default);
     sfboxes                 = getInput('sfboxes', varargin, default);
+    sffunctions             = getInput('sffunctions', varargin, default);
+    sflabels             = getInput('sflabels', varargin, default);
+    
     
     % Recursion
     recursemodels           = getInput('recursemodels', varargin, default);
@@ -175,7 +178,7 @@ function obfuscateModel(sys, parentSys, varargin)
         renameSimFcns(sys, parentSys);
     end
     
-    renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes);
+    renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions);
     
     % Hide
     if hideblocknames

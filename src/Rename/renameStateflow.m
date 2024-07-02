@@ -10,10 +10,13 @@ function renameStateflow(sys, varargin)
     end
 
     sfcharts = getInput('sfcharts', varargin, default);
-    sfports  = getInput('sfinputs', varargin, default);
+    sfports  = getInput('sfports', varargin, default);
     sfevents = getInput('sfevents', varargin, default);
     sfboxes  = getInput('sfboxes',  varargin, default);
     sfstates = getInput('sfstates', varargin, default);
+    sffunctions = getInput('sffunctions', varargin, default);
+    sflabels = getInput('sflabels', varargin, default);
+    
 
     rt = sfroot;
     model = rt.find('-isa', 'Simulink.BlockDiagram', '-and', 'Name', bdroot(sys));
@@ -51,6 +54,7 @@ function renameStateflow(sys, varargin)
         % Rename boxes
         if sfboxes
             boxes = c.find('-isa', 'Stateflow.Box');
+            disp(boxes)
             for n = 1:length(boxes)
                 boxes(n).Name = ['Box' num2str(n)];
             end
@@ -72,6 +76,7 @@ function renameStateflow(sys, varargin)
             states = c.find('-isa', 'Stateflow.State');
             for m = 1:length(states)
                 states(m).Name = ['State' num2str(m)];
+                states(m).LabelString = ['State' num2str(m)];
             end
 
             % Turn back on
@@ -82,9 +87,44 @@ function renameStateflow(sys, varargin)
 
         %% Rename functions
         % Functions are used in transitions, etc. so its difficult to change
-        %sf_functions = c.find('-isa', 'Stateflow.Function');
-        
-        %% TODO: Annotations
+        if sffunctions
+            sf_functions = [c.find('-isa', 'Stateflow.Function') ; c.find('-isa', 'Stateflow.SLFunction')];
+            for f = 1:length(sf_functions)
+                sf_functions(f).Name = ['function' num2str(f)];
+            end
+        end
 
+        %% Relabel transitions
+        if sflabels
+            sf_transitions = c.find('-isa', 'Stateflow.Transition');
+            for t = 1:length(sf_transitions)
+                %disp(sf_transitions(t).LabelString)
+                sf_transitions(t).LabelString = relabel(sf_transitions(t).LabelString);
+                %disp(relabel(sf_transitions(t).LabelString))
+            end
+        end
+    end
+end
+
+%remove IP information from labels
+function label = relabel(label)
+    % Split the string
+    tokens = regexp(label, '[\(\)\[\],<>=\s]+', 'split');
+    for i = 1:length(tokens)
+        token = tokens{i};
+        token_before = token;
+        token = strrep(token,'_','');
+        token = strrep(token,'-','');
+        token = strrep(token,'{','');
+        token = strrep(token,'}','');
+        token = strrep(token,'.','');
+        token = strrep(token,';','');
+        token = strrep(token,'~','');
+
+        if ~isnan(str2double(token))
+            label = strrep(label, token_before, char(string(0)));
+        elseif all(isstrprop(token, 'alphanum')) && strlength(token) > 1
+            label = strrep(label, token_before, token_before(1:2));
+        end
     end
 end
