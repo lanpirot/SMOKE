@@ -5,6 +5,9 @@ function removeAnnotations(sys)
     % Remove block annotations
     blocks = Simulink.findBlocks(sys);
     for i = 1:length(blocks)
-       set_param(blocks(i), 'AttributesFormatString', ''); 
+        if strcmp(get_param(blocks(i), 'AttributesFormatString'),'')
+            continue
+        end
+        set_param(blocks(i), 'AttributesFormatString', '');
     end
 end

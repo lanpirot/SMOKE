@@ -7,8 +7,9 @@ function removeMasks(sys)
         try
             set_param(blocks{i}, 'MaskDisplay', '');
             set_param(blocks{i}, 'Mask', 'off');
+            set_param(blocks{i}, 'MaskInitialization', '')
         catch
-            % Skip. Reference blocks won't allow it.
+            % Skip. E.g., Reference blocks won't allow Mask modifications it.
         end
     end
 end

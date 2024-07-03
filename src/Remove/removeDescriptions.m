@@ -6,8 +6,8 @@ function removeDescriptions(sys)
     all = [all; find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation')];
     all = [all; find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line')];
     for i = 1:length(all)
-        set_param(all(i), 'Description', '');
         try
+            set_param(all(i), 'Description', '');
             set_param(all(i), 'BlockDescription', '');
             set_param(all(i), 'Tag', '');
         catch
