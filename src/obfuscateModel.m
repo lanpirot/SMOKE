@@ -30,7 +30,9 @@ function obfuscateModel(sys, parentSys, varargin)
     end
     
     if strcmp(get_param(sys, 'Lock'), 'on')
-        error('Model must be unlocked.');
+        warning('Model must be unlocked.');
+        return
+        %set_param(sys, 'Lock', 'off')
     end
     
     %% Manage parameters
@@ -61,7 +63,6 @@ function obfuscateModel(sys, parentSys, varargin)
     renamefunctions         = getInput('renamefunctions', varargin, default);
     
     %   Hide
-    hideblocknames          = getInput('hideblocknames', varargin, default);
     hidecontentpreview      = getInput('hidecontentpreview', varargin, default);
     hideportlabels          = getInput('hideportlabels', varargin, default);
     
@@ -72,11 +73,14 @@ function obfuscateModel(sys, parentSys, varargin)
     sfstates                = getInput('sfstates', varargin, default);
     sfboxes                 = getInput('sfboxes', varargin, default);
     sffunctions             = getInput('sffunctions', varargin, default);
-    sflabels             = getInput('sflabels', varargin, default);
+    sflabels                = getInput('sflabels', varargin, default);
     
     
     % Recursion
     recursemodels           = getInput('recursemodels', varargin, default);
+
+    % Context
+    sysfolder               = getInput('sysfolder', varargin, 'No Path given');
     
     %% Recurse Model References
     if ~removemodelreferences && recursemodels
@@ -84,7 +88,10 @@ function obfuscateModel(sys, parentSys, varargin)
         if ~isempty(refs)
             for i = 1:length(refs)
                 modelName = get_param(refs{i}, 'ModelName');
-                load_system(modelName);
+                if strcmp(modelName, '<Enter Model Name>')
+                    continue                             %no model name is given, we do not just try out any name -- as the file is unknown, we also cannot obfuscate it
+                end
+                load_system([sysfolder filesep modelName]);
                 obfuscateModel(modelName, sys, varargin{:});
                 save_system(modelName);
                 close_system(modelName);
@@ -93,14 +100,14 @@ function obfuscateModel(sys, parentSys, varargin)
         end
     end
     
-    %% Perform Obfucsation
+    %% Perform Obfuscation
     % Remove parameters and blocks
-    if removemasks
-        removeMasks(sys)
-    end
-    
     if removelibrarylinks
         removeLibraryLinks(sys)
+    end
+
+    if removemasks
+        removeMasks(sys)
     end
     
     if removemodelreferences
@@ -180,13 +187,13 @@ function obfuscateModel(sys, parentSys, varargin)
     
     renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions);
     
-    % Hide
-    if hideblocknames
-        hideBlockNames(sys);
-    end
           
     if hidecontentpreview
         hideContentPreview(sys);
+    end
+    
+    if removelibrarylinks
+        removeLibraryLinks(sys)
     end
     
     if hideportlabels

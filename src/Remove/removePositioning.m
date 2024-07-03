@@ -26,6 +26,11 @@ function removePositioning(sys)
         end
 
         %then auto layout the subsystems
-        Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
+        try
+            Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
+        catch ME
+            %some Subsystems, like the compare to constant block pretend to
+            %be a Subsystem, while no changes within are possible.
+        end
     end
 end

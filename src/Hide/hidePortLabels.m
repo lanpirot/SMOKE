@@ -28,3 +28,4 @@ function hidePortLabels(sys, varargin)
             set_param(blocks{i}, 'ShowPortLabels', 'FromPortIcon');
         end
     end
+end

@@ -57,10 +57,11 @@ function renameBlocks(sys)
             if strcmp(ME.identifier, 'Simulink:blocks:DupBlockName')
                 % Block with thame name already exists
                 parent = get_param(blks_hdl(j), 'Parent');
-                set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp']);
+                set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp' num2str(j)]);
                 set_param(blks_hdl(j), 'Name', blks_rename{j});
             else
                 warning(['Could not rename block ' blks{j}]);
             end
         end
     end
+end
