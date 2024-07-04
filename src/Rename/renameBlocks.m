@@ -1,7 +1,7 @@
 function renameBlocks(sys)
 % RENAMEBLOCKS Change the 'Name' parameter to a generic name based on the block type.
     
-    blks = find_system(sys, 'FollowLinks', 'on', 'Type', 'Block');
+    blks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
     blks_hdl = get_param(blks, 'Handle');
     blks_hdl = [blks_hdl{:}]; % Convert to numeric
     blks_parent = get_param(blks, 'Parent');
@@ -17,7 +17,10 @@ function renameBlocks(sys)
            sfBlockType = '';
            try 
                sfBlockType = get_param(blks{h}, 'SFBlockType');
-           catch
+           catch ME
+                if ~strcmp(ME.identifier, '')
+                    rethrow(ME)
+                end
            end
             
            if ~isempty(sfBlockType) && ~strcmpi(sfBlockType, 'NONE')
@@ -55,7 +58,7 @@ function renameBlocks(sys)
             set_param(blks_hdl(j), 'Name', blks_rename{j});
         catch ME
             if strcmp(ME.identifier, 'Simulink:blocks:DupBlockName')
-                % Block with thame name already exists
+                % Block with that name already exists
                 parent = get_param(blks_hdl(j), 'Parent');
                 set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp' num2str(j)]);
                 set_param(blks_hdl(j), 'Name', blks_rename{j});

@@ -11,7 +11,8 @@ function removePositioning(sys)
 %       Autopositions the whole model
 
     %for all subsystems:
-    subsystems = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    sys = get_param(sys, 'handle');
+    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
     subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 

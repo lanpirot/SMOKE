@@ -84,18 +84,20 @@ function obfuscateModel(sys, parentSys, varargin)
     
     %% Recurse Model References
     if ~removemodelreferences && recursemodels
-        refs = find_system(sys, 'BlockType', 'ModelReference');
+        refs = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'ModelReference');
         if ~isempty(refs)
             for i = 1:length(refs)
                 modelName = get_param(refs{i}, 'ModelName');
-                if strcmp(modelName, '<Enter Model Name>')
-                    continue                             %no model name is given, we do not just try out any name -- as the file is unknown, we also cannot obfuscate it
+                try
+                    load_system([sysfolder filesep modelName]);
+                    obfuscateModel(modelName, sys, varargin{:});
+                    save_system(modelName);
+                    Simulink.ModelReference.refresh(refs{i});
+                    close_system(modelName);
+                catch ME %no referenced model name is given, we do not just try out any name -- as the file is unknown, we also cannot obfuscate it
+                    continue
                 end
-                load_system([sysfolder filesep modelName]);
-                obfuscateModel(modelName, sys, varargin{:});
-                save_system(modelName);
-                close_system(modelName);
-                Simulink.ModelReference.refresh(refs{i});
+                
             end
         end
     end
@@ -108,6 +110,10 @@ function obfuscateModel(sys, parentSys, varargin)
 
     if removemasks
         removeMasks(sys)
+    end
+
+    if removeblockcallbacks
+        removeBlockCallbacks(sys)
     end
     
     if removemodelreferences
@@ -136,10 +142,6 @@ function obfuscateModel(sys, parentSys, varargin)
     
     if removecolorannotations
         removeAnnotationColors(sys)
-    end
-
-    if removeblockcallbacks
-        removeBlockCallbacks(sys)
     end
     
     if removemodelinformation

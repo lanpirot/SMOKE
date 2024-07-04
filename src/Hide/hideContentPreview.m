@@ -22,7 +22,10 @@ function hideContentPreview(sys, varargin)
     
     if hide
         for i = 1:length(blocks)
-            set(blocks{i}, 'ContentPreviewEnabled', 'Off'); 
+            try
+                set(blocks{i}, 'ContentPreviewEnabled', 'Off'); 
+            catch ME %trying to suppress popup errors of Mask Initialization failures
+            end
         end
     else
         for i = 1:length(blocks)

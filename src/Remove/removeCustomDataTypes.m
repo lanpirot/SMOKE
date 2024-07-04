@@ -5,7 +5,7 @@ function removeCustomDataTypes(sys)
     % - Allow fixdt
     % - Should work on all blocks with a specified data type
     builtinTypes = [{'Inherit: auto'}, {'boolean'}, {'double'}, {'single'}, {'int8'}, {'uint8'}, {'int16'}, {'uint16'}, {'int32'}, {'uint32'}];
-    inports = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'block', 'BlockType', 'Inport');
+    inports = find_system(sys, 'LookUnderMasks', 'all', ''FollowLinks', 'on', 'type', 'block', 'BlockType', 'Inport');
     for i = 1:length(inports)
         t = get_param(inports(i), 'OutDataTypeStr');
         if ~any(ismember(builtinTypes, t))

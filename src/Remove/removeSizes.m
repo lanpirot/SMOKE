@@ -11,7 +11,8 @@ function removeSizes(sys)
 %       Resets shape and sizes of blocks
 
     %for all subsystems:
-    subsystems = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    sys = get_param(sys, 'handle');
+    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
     subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 
@@ -32,12 +33,18 @@ function removeSizes(sys)
                 curr_block_pos(4) = curr_block_pos(2) + height;
                 set_param(curr_block, 'Position', curr_block_pos)
             catch ME
+                if ~ismember(ME.identifier, {'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:EnablePortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Libraries:RefModificationViolation'})
+                    rethrow(ME)
+                end
             end
     
             % Clean up: Remove tmp block
             try
                 delete_block(tmp_block_path)
             catch ME
+                if ~strcmp(ME.identifier, 'Simulink:Commands:InvSimulinkObjectName')
+                    rethrow(ME)
+                end
             end
         end
         

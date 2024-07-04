@@ -12,7 +12,7 @@ function removeSignalNames(sys)
 %       Removes names and disables signal propagation.
 
     % Lines
-    lines = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line');
+    lines = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line');
     for i = 1:length(lines)
         try
             set(lines(i), 'SignalPropagation', 'off');
@@ -30,7 +30,7 @@ function removeSignalNames(sys)
              try
                 set_param(pc.Outport(k), 'ShowPropagatedSignals', 'off')
              catch me
-                 if ~strcmp(me.identifier, 'Simulink:Signals:NoPropSigLabThroughBlock')
+                 if ~strcmp(me.identifier, 'Simulink:Signals:NoPropSigLabThroughBlock') && ~strcmp(me.identifier, 'Simulink:Libraries:LockViolation')
                      rethrow(me)
                  end
              end

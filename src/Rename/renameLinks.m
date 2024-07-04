@@ -1,7 +1,7 @@
 function renameLinks(sys)
 % RENAMELINKS Give all linked blocks and library links new names. Show names for inspection purposes.
 
-    blocks = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'block', 'BlockType', 'Reference'); 
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block', 'BlockType', 'Reference'); 
     for i = 1:length(blocks)
         set_param(blocks(i), 'ShowName', 'on');
         try

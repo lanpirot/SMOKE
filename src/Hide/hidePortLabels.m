@@ -21,7 +21,10 @@ function hidePortLabels(sys, varargin)
     
     if hide
         for i = 1:length(blocks)
-            set_param(blocks{i}, 'ShowPortLabels', 'none');
+            try
+                set_param(blocks{i}, 'ShowPortLabels', 'none');
+            catch ME %may cause 'Failed to evaluate mask initialization commands.'
+            end
         end
     else
         for i = 1:length(blocks)

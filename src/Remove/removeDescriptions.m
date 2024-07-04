@@ -2,15 +2,19 @@ function removeDescriptions(sys)
 % REMOVEDESCRIPTIONS Remove all Description parameters in lines, blocks and
 % annotations.
 
-    all = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'block');
-    all = [all; find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation')];
-    all = [all; find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line')];
+    sys = get_param(sys, 'handle');
+    all = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation')];
+    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line')];
     for i = 1:length(all)
         try
             set_param(all(i), 'Description', '');
-            set_param(all(i), 'BlockDescription', '');
             set_param(all(i), 'Tag', '');
-        catch
+            set_param(all(i), 'BlockDescription', '');
+        catch ME
+            if ~ismember(ME.identifier, {'Simulink:Commands:SetParamReadOnly' 'Simulink:Commands:ParamUnknown' 'Simulink:Libraries:RefModificationViolation'})
+                rethrow(ME)
+            end
         end
     end
             

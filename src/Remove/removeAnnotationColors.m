@@ -1,9 +1,15 @@
 function removeAnnotationColors(sys)
 % REMOVEANNOTATIONCOLORS Remove all annotation coloring from the model.
 
-    ann = find_system(sys, 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation');
+    ann = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation');
     for i = 1:length(ann)
-        set_param(ann(i), 'ForegroundColor', 'black');
-        set_param(ann(i), 'BackgroundColor', 'white');
+        try
+            set_param(ann(i), 'ForegroundColor', 'black');
+            set_param(ann(i), 'BackgroundColor', 'white');
+        catch ME %in unlockable Subsystems, these changes are not supported
+            if ~strcmp(ME.identifier, 'Simulink:Libraries:RefViolation')
+                rethrow(ME)
+            end
+        end
     end
 end
