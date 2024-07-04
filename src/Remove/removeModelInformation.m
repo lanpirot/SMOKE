@@ -3,6 +3,7 @@ function removeModelInformation(sys)
 % Model Properties > Main and Model Properties > History. The model must be
 % saved in order for some changes to take effect (i.e., LastModifiedBy data).
 
+    sys = get_param(sys, 'handle');
     date = datestr(now, 'ddd mmm dd HH:MM:SS yyyy');
     date = reshape(date, 1, length(date));
     name = 'user';

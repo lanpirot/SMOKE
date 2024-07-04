@@ -11,6 +11,8 @@ function hidePortLabels(sys, varargin)
 %   Side Effects:
 %       Shows or hides the port label.
 
+    sys = get_param(sys, 'handle');
+
     if nargin > 1
         hide = varargin{1};
     else
@@ -22,13 +24,13 @@ function hidePortLabels(sys, varargin)
     if hide
         for i = 1:length(blocks)
             try
-                set_param(blocks{i}, 'ShowPortLabels', 'none');
+                set_param(blocks(i), 'ShowPortLabels', 'none');
             catch ME %may cause 'Failed to evaluate mask initialization commands.'
             end
         end
     else
         for i = 1:length(blocks)
-            set_param(blocks{i}, 'ShowPortLabels', 'FromPortIcon');
+            set_param(blocks(i), 'ShowPortLabels', 'FromPortIcon');
         end
     end
 end

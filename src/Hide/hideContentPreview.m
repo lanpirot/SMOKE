@@ -11,6 +11,7 @@ function hideContentPreview(sys, varargin)
 %   Side Effects:
 %       Shows or hides the content preview.
 
+    sys = get_param(sys, 'handle');
     if nargin > 1
         hide = varargin{1};
     else
@@ -23,13 +24,13 @@ function hideContentPreview(sys, varargin)
     if hide
         for i = 1:length(blocks)
             try
-                set(blocks{i}, 'ContentPreviewEnabled', 'Off'); 
+                set(blocks(i), 'ContentPreviewEnabled', 'Off'); 
             catch ME %trying to suppress popup errors of Mask Initialization failures
             end
         end
     else
         for i = 1:length(blocks)
-            set(blocks{i}, 'ContentPreviewEnabled', 'On');
+            set(blocks(i), 'ContentPreviewEnabled', 'On');
         end
     end
 end

@@ -11,6 +11,7 @@ function removeSignalNames(sys)
 %   Side Effects:
 %       Removes names and disables signal propagation.
 
+    sys = get_param(sys, 'handle');
     % Lines
     lines = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line');
     for i = 1:length(lines)

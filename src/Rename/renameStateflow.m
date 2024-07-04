@@ -1,6 +1,7 @@
 function renameStateflow(sys, varargin)
 % RENAMESTATEFLOW Rename chart blocks and their data to generic names.
 
+    sys = get_param(sys, 'handle');
     % If not args are given, run all checks. 
     % If some args are given, only run those enabled.
     if isempty(varargin)
@@ -19,7 +20,7 @@ function renameStateflow(sys, varargin)
     
 
     rt = sfroot;
-    model = rt.find('-isa', 'Simulink.BlockDiagram', '-and', 'Name', bdroot(sys));
+    model = rt.find('-isa', 'Simulink.BlockDiagram', '-and', 'Name', bdroot(get_param(sys, 'Name')));
     charts = model.find('-isa', 'Stateflow.Chart');
 
     for i = 1:length(charts)

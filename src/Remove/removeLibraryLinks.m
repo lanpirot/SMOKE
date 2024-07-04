@@ -21,7 +21,7 @@ function removeLibraryLinks(sys)
             set_param(blocks(i), 'ReferenceBlock', '');
             set_param(blocks(i), 'SourceBlock', '');
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown' 'Simulink:blocks:BlkParamLinkStatusOnNonReference' 'Simulink:Libraries:MissingSourceBlock' 'Simulink:blocks:SubsysReadProtectErr' 'Simulink:blocks:SubsysErrFcnMsgInvCB' 'Simulink:Commands:InvSimulinkObjHandle'})
+            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown' 'Simulink:blocks:BlkParamLinkStatusOnNonReference' 'Simulink:Libraries:MissingSourceBlock' 'Simulink:blocks:SubsysReadProtectErr' 'Simulink:blocks:SubsysErrFcnMsgInvCB' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem'})
                 rethrow(ME)
             end
         end

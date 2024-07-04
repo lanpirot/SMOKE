@@ -1,9 +1,9 @@
 function renameBlocks(sys)
 % RENAMEBLOCKS Change the 'Name' parameter to a generic name based on the block type.
     
+    sys = get_param(sys, 'handle');
     blks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
     blks_hdl = get_param(blks, 'Handle');
-    blks_hdl = [blks_hdl{:}]; % Convert to numeric
     blks_parent = get_param(blks, 'Parent');
     
     blks_rename = cell(size(blks));
@@ -11,12 +11,15 @@ function renameBlocks(sys)
     
     % Get more accurate block types for Stateflow elements
     blks_type = get_param(blks, 'BlockType');
+    if ~iscell(blks_type)
+        blks_type = {blks_type};
+    end
     for h = 1:length(blks_type)
        if strcmp(blks_type{h}, 'SubSystem')
             
            sfBlockType = '';
            try 
-               sfBlockType = get_param(blks{h}, 'SFBlockType');
+               sfBlockType = get_param(blks(h), 'SFBlockType');
            catch ME
                 if ~strcmp(ME.identifier, '')
                     rethrow(ME)
@@ -63,7 +66,7 @@ function renameBlocks(sys)
                 set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp' num2str(j)]);
                 set_param(blks_hdl(j), 'Name', blks_rename{j});
             else
-                warning(['Could not rename block ' blks{j}]);
+                warning(['Could not rename block ' blks(j)]);
             end
         end
     end

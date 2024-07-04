@@ -1,6 +1,7 @@
 function removeAnnotationColors(sys)
 % REMOVEANNOTATIONCOLORS Remove all annotation coloring from the model.
 
+    sys = get_param(sys, 'handle');
     ann = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation');
     for i = 1:length(ann)
         try
