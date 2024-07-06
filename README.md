@@ -1,9 +1,6 @@
-# Obfuscate Model Tool
+# SMOKE: Simulink Model Obfusccation Keeping structurE
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4396166.svg)](https://doi.org/10.5281/zenodo.4396166)
-[![View Model Comparison Utility on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/84897-obfuscate-model-tool)
-
-The Obfuscate Model Tool removes, renames, and/or hides various details of a Simulink model in order to hide confidential information. This can be useful for eliminating proprietary details when sending models to third-parties, or even by removing details from models in order to create simpler images suitable for publication.
+The SMOKE Tool removes, renames, and/or hides various aspects of a Simulink model in order to hide confidential information. This can be useful for eliminating proprietary details when sending models to third-parties, or even by removing details from models in order to create simpler images suitable for publication.
 
 <img src="imgs/Cover.png" width="850">
 
@@ -11,4 +8,4 @@ The Obfuscate Model Tool removes, renames, and/or hides various details of a Sim
 
 ## User Guide
 
-For installation and other information, please see the [User Guide](doc/ObfuscateModel_UserGuide.pdf).
+For installation and other information, please see the [User Guide](doc/SMOKE_UserGuide.pdf).
