@@ -31,8 +31,8 @@ function obfuscateModel(sys, parentSys, varargin)
     
     if strcmp(get_param(sys, 'Lock'), 'on')
         warning('Model must be unlocked.');
-        return
         %set_param(sys, 'Lock', 'off')
+        return
     end
     
     %% Manage parameters

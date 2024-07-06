@@ -13,6 +13,7 @@ function removeDialogParameters(sys)
     sys = get_param(sys, 'handle');
     block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
     for i = 1:length(block)
+        %fprintf("i %i",i)
         % create a tmp block from which to steal the default parameter values
         try
             curr_block = block(i);
@@ -24,7 +25,8 @@ function removeDialogParameters(sys)
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
-                    if ismember(params{1}, {'Inputs', 'Outputs'}) %don't ruin mux/demux ports and their lines
+                    %fprintf("p %i",p)
+                    if ismember(params{p}, {'Inputs', 'Outputs'}) %don't ruin mux/demux ports and their lines
                         continue
                     end
                     try
@@ -39,7 +41,7 @@ function removeDialogParameters(sys)
             end
             set_param(curr_block, 'MoveFcn', '')
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle'})
+            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain'})
                 rethrow(ME)
             end
         end

@@ -3,7 +3,6 @@ function renameBlocks(sys)
     
     sys = get_param(sys, 'handle');
     blks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
-    blks_hdl = get_param(blks, 'Handle');
     blks_parent = get_param(blks, 'Parent');
     
     blks_rename = cell(size(blks));
@@ -31,7 +30,7 @@ function renameBlocks(sys)
                blks_type{h} = strrep(sfBlockType, ' ', '');
            else
                % Subsystem
-               blks_type{h} = getSubsystemType(blks_hdl(h));
+               blks_type{h} = getSubsystemType(blks(h));
            end   
        end
     end
@@ -58,15 +57,17 @@ function renameBlocks(sys)
     % Rename
     for j = 1:length(blks)
         try
-            set_param(blks_hdl(j), 'Name', blks_rename{j});
+            set_param(blks(j), 'Name', blks_rename{j});
+            set_param(blks(j), 'ShowName', 'off');
         catch ME
             if strcmp(ME.identifier, 'Simulink:blocks:DupBlockName')
                 % Block with that name already exists
-                parent = get_param(blks_hdl(j), 'Parent');
+                parent = get_param(blks(j), 'Parent');
                 set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp' num2str(j)]);
-                set_param(blks_hdl(j), 'Name', blks_rename{j});
+                set_param(blks(j), 'Name', blks_rename{j});
             else
                 warning(['Could not rename block ' blks(j)]);
+                rethrow(ME)
             end
         end
     end

@@ -12,7 +12,7 @@ function removeDescriptions(sys)
             set_param(all(i), 'Tag', '');
             set_param(all(i), 'BlockDescription', '');
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:SetParamReadOnly' 'Simulink:Commands:ParamUnknown' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Libraries:RefViolation' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem'})
+            if ~ismember(ME.identifier, {'Simulink:Commands:SetParamReadOnly' 'Simulink:Commands:ParamUnknown' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Libraries:RefViolation' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem' 'Simulink:BusElPorts:CannotChangeAttributesBusObject'})
                 corethrow(ME)
             end
         end
