@@ -76,8 +76,14 @@ function renameStateflow(sys, varargin)
 
             states = c.find('-isa', 'Stateflow.State');
             for m = 1:length(states)
-                states(m).Name = ['State' num2str(m)];
-                states(m).LabelString = ['State' num2str(m)];
+                try
+                    states(m).Name = ['State' num2str(m)];
+                    states(m).LabelString = ['State' num2str(m)];
+                catch ME
+                    if ~ismember(ME.identifier, {'Stateflow:misc:CannotChangeStatesInGroupedState'})
+                        rethrow(ME)
+                    end
+                end
             end
 
             % Turn back on

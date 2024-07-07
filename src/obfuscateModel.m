@@ -187,7 +187,7 @@ function obfuscateModel(sys, parentSys, varargin)
         renameSimFcns(sys, parentSys);
     end
     
-    renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions);
+    renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels);
     
           
     if hidecontentpreview

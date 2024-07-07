@@ -12,7 +12,7 @@ function removeBlockCallbacks(sys)
             try
                 set_param(blocks(i), callbacks{c}, '');
             catch ME
-                if ~ismember(ME.identifier, {'Simulink:Commands:SetParamInvalidArgumentType' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem'})
+                if ~ismember(ME.identifier, {'Simulink:Commands:SetParamInvalidArgumentType' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem' 'Simulink:blocks:SubsysErrFcnMsgInvCB'})
                     rethrow(ME)
                 end
             end

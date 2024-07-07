@@ -39,8 +39,6 @@ function tests()
     models = find_models("C:\work\data\SLNET");
     varArgs = createVar(args, 0, 1);    %removemodelreferences and recursemodels: only one of them can be 1
     runLoop(models, csvData, csvFile, varArgs);
-    %varArgs = createVar(args, 1, 0);    %removemodelreferences and recursemodels: only one of them can be 1
-    %csvData = runLoop(models, csvData, csvFile, varArgs);
 end
 
 function csvData = runLoop(models, csvData, csvFile, args)
