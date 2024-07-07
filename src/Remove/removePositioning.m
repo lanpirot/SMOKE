@@ -30,6 +30,9 @@ function removePositioning(sys)
         try
             Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
         catch ME
+            if ~ismember(ME.identifier, {'glee_util:messages:GenericError'})
+                rethrow(ME)
+            end
             %some Subsystems, like the compare to constant block pretend to
             %be a Subsystem, while no changes within are possible.
         end

@@ -47,9 +47,10 @@ function csvData = runLoop(models, csvData, csvFile, args)
     recurseMode = getInput('recursemodels', args, 'ERROR');
 
     for m = 1:length(models)
-        if any(csvData.ID == m & csvData.RecurseMode == recurseMode) %we already have this entry in our table
+        if any(csvData.ID == m)
             continue
         end
+
         model = models(m);
         fprintf("%i %s\n", m, model.name)
         close_system(model.name(1:end-4), 0)
@@ -82,7 +83,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             success = 1;
             metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on')) - length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'Annotation'));
             try
-                save_system(sys, ['C:\tmp\obfmodels\' model.name(1:end-4) num2str(m) model.name(end-3:end)])
+                save_system(sys, ['C:\tmp\obfmodels\' model.name(1:min(end-4, 52)) num2str(m) model.name(end-3:end)])
                 saveable = 1;
             catch ME
                 saveable = 0;
@@ -93,11 +94,6 @@ function csvData = runLoop(models, csvData, csvFile, args)
         end    
         
         
-
-        
-        if time < 1 && metric_before > 1000
-            disp(1)
-        end
         csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, recurseMode, success, saveable, time, metric_before, metric_after, locked});
         bdclose('all')
     end

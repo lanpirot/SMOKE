@@ -87,7 +87,15 @@ function obfuscateModel(sys, parentSys, varargin)
         refs = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'ModelReference');
         if ~isempty(refs)
             for i = 1:length(refs)
-                modelName = get_param(refs{i}, 'ModelName');
+                try
+                    modelName = get_param(refs{i}, 'ModelName');
+                catch ME
+                    if strcmp(ME.identifier, 'Simulink:protectedModel:ProtectedModelGetParamModelName')
+                        modelName = get_param(refs{i}, 'ModelFile');
+                    else
+                        rethrow(ME)
+                    end
+                end
                 try
                     load_system([sysfolder filesep modelName]);
                     obfuscateModel(modelName, sys, varargin{:});
@@ -151,14 +159,6 @@ function obfuscateModel(sys, parentSys, varargin)
     if removedialogparameters
         removeDialogParameters(sys)
     end
-
-    if removepositioning
-        removePositioning(sys)
-    end
-
-    if removesizes
-        removeSizes(sys)
-    end
     
     %removeCustomDataTypes(sys)  % will probably affect functionality
 
@@ -200,5 +200,13 @@ function obfuscateModel(sys, parentSys, varargin)
     
     if hideportlabels
         hidePortLabels(sys);
+    end
+
+    if removesizes
+        removeSizes(sys)
+    end
+
+    if removepositioning
+        removePositioning(sys)
     end
 end
