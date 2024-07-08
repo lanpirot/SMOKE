@@ -55,7 +55,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         try
             model_path = [model.folder filesep model.name];
             sys = load_system(model_path);
-            metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on')) - length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'Annotation'));
+            metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
             loadable = 1;
         catch ME
             loadable = 0;
@@ -79,9 +79,9 @@ function csvData = runLoop(models, csvData, csvFile, args)
             time = toc;
             locked = 0;
             success = 1;
-            metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on')) - length(find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'Annotation'));
+            metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
             try
-                save_system(sys, ['C:\tmp\obfmodels\' model.name(1:min(end-4, 52)) num2str(m) model.name(end-3:end)])
+                save_system(sys, ['C:\tmp\obfmodels\' model.name(1:min(end-4, 52)) num2str(m) model.name(end-3:end)], 'SaveDirtyReferencedModels', 'on')
                 saveable = 1;
             catch ME
                 saveable = 0;

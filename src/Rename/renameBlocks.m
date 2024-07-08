@@ -35,39 +35,17 @@ function renameBlocks(sys)
        end
     end
     
-    % Determine new name
-    for i = 1:length(blks)
-        suffix = 1;
-
-        if i == 1
-            % First element has no duplicates, so don't need further checks
-            blks_rename{i} = [blks_type{i} num2str(suffix)];
-            continue
-        end
-        
-        % Check that new block name does not overlap with previous names
-        sameTypeIdx = strcmp(blks_type{i}, blks_type(1:i-1));
-        parents = blks_parent(sameTypeIdx);
-        numDuplicates = length(find(strcmp(blks_parent(i), parents)));
-
-        suffix = numDuplicates + 1; % Increment suffix so the names aren't the same
-        blks_rename{i} = [blks_type{i} num2str(suffix)];
-    end
-    
     % Rename
+    suffix = 1;
     for j = 1:length(blks)
-        try
-            set_param(blks(j), 'Name', blks_rename{j});
-            set_param(blks(j), 'ShowName', 'off');
-        catch ME
-            if strcmp(ME.identifier, 'Simulink:blocks:DupBlockName')
-                % Block with that name already exists
-                parent = get_param(blks(j), 'Parent');
-                set_param([parent '/' blks_rename{j}], 'Name', [blks_rename{j} '_temp' num2str(j)]);
-                set_param(blks(j), 'Name', blks_rename{j});
-            else
-                warning(['Could not rename block ' blks(j)]);
-                rethrow(ME)
+        while 1
+            suffix = suffix + 1;
+            try
+                set_param(blks(j), 'Name', [blks_type{j} num2str(suffix)]);
+                set_param(blks(j), 'ShowName', 'off');
+                break
+            catch ME
+                %try again, until an unblocked name is found
             end
         end
     end

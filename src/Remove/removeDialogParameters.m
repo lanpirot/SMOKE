@@ -14,6 +14,9 @@ function removeDialogParameters(sys)
     block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
     for i = 1:length(block)
         %fprintf("i %i",i)
+        %if strcmp(get_param(block(i), 'BlockType'), 'Record')
+        %    continue
+        %end
         % create a tmp block from which to steal the default parameter values
         try
             curr_block = block(i);
