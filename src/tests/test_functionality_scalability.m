@@ -45,6 +45,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
     recurseMode = getInput('recursemodels', args, 'ERROR');
 
     for m = 1:length(models)
+     
         if any(csvData.ID == m)
             continue
         end

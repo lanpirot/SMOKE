@@ -51,6 +51,7 @@ function obfuscateModel(sys, parentSys, varargin)
     removecolorblocks       = getInput('removecolorblocks', varargin, default);
     removecolorannotations  = getInput('removecolorannotations', varargin, default);
     removedialogparameters  = getInput('removedialogparameters', varargin, default);
+    removefunctions         = getInput('removefunctions', varargin, default);
     removepositioning       = getInput('removepositioning', varargin, default);
     removesizes             = getInput('removesizes', varargin, default);
     
@@ -158,6 +159,10 @@ function obfuscateModel(sys, parentSys, varargin)
 
     if removedialogparameters
         removeDialogParameters(sys)
+    end
+
+    if removefunctions
+        removeFunctions(sys)
     end
     
     %removeCustomDataTypes(sys)  % will probably affect functionality
