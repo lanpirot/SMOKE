@@ -3,8 +3,9 @@
 %compares model metrics before and after
 
 
-function tests()
-    csvFile = 'obfuscateTest.csv';
+function test_scalability()
+    bdclose('all')
+    csvFile = 'results_scalability.csv';
     csvData = readCsv(csvFile);
     warning('off', 'all');
     args = {...
@@ -19,6 +20,7 @@ function tests()
         'removecolorblocks',      1, ...
         'removecolorannotations', 1, ...
         'removedialogparameters', 1, ...
+        'removefunctions',        1, ...
         'removepositioning',      1, ...
         'removesizes',            1, ...
         'renameblocks',           1, ...
@@ -35,17 +37,16 @@ function tests()
         'sfstates',               1, ...
         'sfboxes',                1, ...
         'sffunctions',            1, ...
-        'sflabels',               1};
+        'sflabels',               1, ...
+        'removemodelreferences',  0, ...
+        'recursemodels',          1};
     models = find_models("C:\work\data\SLNET");
-    varArgs = createVar(args, 0, 1);    %removemodelreferences and recursemodels: only one of them can be 1
-    runLoop(models, csvData, csvFile, varArgs);
+    runLoop(models, csvData, csvFile, args);
 end
 
-function csvData = runLoop(models, csvData, csvFile, args)
-    recurseMode = getInput('recursemodels', args, 'ERROR');
 
+function csvData = runLoop(models, csvData, csvFile, args)
     for m = 1:length(models)
-     
         if any(csvData.ID == m)
             continue
         end
@@ -56,11 +57,11 @@ function csvData = runLoop(models, csvData, csvFile, args)
         try
             model_path = [model.folder filesep model.name];
             sys = load_system(model_path);
-            metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
+            metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             loadable = 1;
         catch ME
             loadable = 0;
-            csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, recurseMode, 0, NaN, NaN, NaN, NaN, NaN});
+            csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, 0, NaN, NaN, NaN, NaN, NaN});
             continue %model is broken
         end
         sys = get_param(sys, 'Name');
@@ -80,7 +81,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             time = toc;
             locked = 0;
             success = 1;
-            metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
+            metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             try
                 save_system(sys, ['C:\tmp\obfmodels\' model.name(1:min(end-4, 52)) num2str(m) model.name(end-3:end)], 'SaveDirtyReferencedModels', 'on')
                 saveable = 1;
@@ -93,19 +94,15 @@ function csvData = runLoop(models, csvData, csvFile, args)
         end    
         
         
-        csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, recurseMode, success, saveable, time, metric_before, metric_after, locked});
+        csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
         bdclose('all')
     end
 end
 
 function new_table = append_to_table(old_table, filename, new_data)
-    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'Loadable', 'RecurseMode', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'});
+    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'});
     new_table = [old_table; new_data];
     writetable(new_table, filename);
-end
-
-function args = createVar(args, removemodelreferences, recursemodels)
-    args = [args 'removemodelreferences' removemodelreferences 'recursemodels' recursemodels];
 end
 
 function models = find_models(path)
@@ -115,7 +112,7 @@ end
 function csvData = readCsv(filename)
     if exist(filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
-        header = {'ID', 'ModelPath', 'Loadable', 'RecurseMode', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'};
+        header = {'ID', 'ModelPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'};
         % Convert the header to a table and write it to a CSV file
         writetable(cell2table(header), filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');

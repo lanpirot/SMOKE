@@ -3,10 +3,8 @@ function renameBlocks(sys)
     
     sys = get_param(sys, 'handle');
     blks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Type', 'Block');
-    blks_parent = get_param(blks, 'Parent');
     
-    blks_rename = cell(size(blks));
-    blks_rename(:) = {''};
+    
     
     % Get more accurate block types for Stateflow elements
     blks_type = get_param(blks, 'BlockType');
@@ -37,6 +35,7 @@ function renameBlocks(sys)
     
     % Rename
     suffix = 1;
+    l = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
     for j = 1:length(blks)
         while 1
             suffix = suffix + 1;

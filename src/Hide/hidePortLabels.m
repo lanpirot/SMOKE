@@ -27,6 +27,7 @@ function hidePortLabels(sys, varargin)
                 set_param(blocks(i), 'ShowPortLabels', 'none');
             catch ME %may cause 'Failed to evaluate mask initialization commands.'
             end
+            %fprintf('%i %i\n', i, length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on')))
         end
     else
         for i = 1:length(blocks)

@@ -12,24 +12,25 @@ function removeDialogParameters(sys)
 
     sys = get_param(sys, 'handle');
     block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    l = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
     for i = 1:length(block)
+        if i == 105
+            %keyboard
+        end
         %fprintf("i %i",i)
-        %if strcmp(get_param(block(i), 'BlockType'), 'Record')
-        %    continue
-        %end
-        % create a tmp block from which to steal the default parameter values
         try
             curr_block = block(i);
             curr_parent = get_param(curr_block, 'Parent');
             tmp_block_path = [curr_parent '/' 'tmpblock'];
             tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);
+            l = l+1;
             
             if ~isempty(get_param(tmp_block, 'DialogParameters'))
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
                     %fprintf("p %i",p)
-                    if ismember(params{p}, {'Inputs', 'Outputs'}) %don't ruin mux/demux ports and their lines
+                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice'}) %don't ruin structure, like mux/demux
                         continue
                     end
                     try
@@ -40,6 +41,7 @@ function removeDialogParameters(sys)
                         %    rethrow(ME)
                         %end
                     end
+                    %fprintf('%i %i\n', p, length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on')))
                 end
             end
             set_param(curr_block, 'MoveFcn', '')
@@ -52,11 +54,15 @@ function removeDialogParameters(sys)
         % Clean up: Remove tmp block
         try
             delete_block(tmp_block_path)
+            l = l - 1;
         catch ME
             if ~strcmp(ME.identifier, 'Simulink:Commands:InvSimulinkObjectName')
                 rethrow(ME)
             end
         end
-        
+
+        if l ~= length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'))
+            %keyboard
+        end
     end
 end
