@@ -15,7 +15,7 @@ end
 
 function csvData = runLoop(obf_models, csvData, csvFile)
     models = csvData{:, 'ModelPath'};
-    for m = 5618:length(models)
+    for m = 8920:length(models)
         if csvData{m, 'Saveable'} ~= 1 || csvData{m, 'Metrics_before'} == csvData{m, 'Metrics_after'}
             continue
         end
@@ -26,7 +26,7 @@ function csvData = runLoop(obf_models, csvData, csvFile)
 
         obf_model_name = lookup_obf_model(model_path, m);
         if ~ismember(obf_model_name, {obf_models.name})
-            fprintf(" NO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUND NO SAVE FOUND!\n")
+            fprintf("\n NO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUND NO SAVE FOUND!\n")
             continue
         end
         model_path_obf = ['C:\tmp\obfmodels\' obf_model_name];

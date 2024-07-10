@@ -47,9 +47,6 @@ end
 
 function csvData = runLoop(models, csvData, csvFile, args)
     for m = 1:length(models)
-        if any(csvData.ID == m)
-            continue
-        end
 
         model = models(m);
         fprintf("%i %s\n", m, model.name)
@@ -91,9 +88,9 @@ function csvData = runLoop(models, csvData, csvFile, args)
                     rethrow(ME)
                 end
             end
-        end    
-        
-        
+        end
+
+
         csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
         bdclose('all')
     end
