@@ -46,8 +46,9 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for m = 1:length(models)
-
+    for n = 1:length(models)
+        m = fibonacci(n);
+        
         model = models(m);
         fprintf("%i %s\n", m, model.name)
         close_system(model.name(1:end-4), 0)

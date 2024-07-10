@@ -8918,7 +8918,7 @@ ID,ModelPath,Loadable,Success,Saveable,Time,Metrics_before,Metrics_after,Locked
 8917,"C:\work\data\SLNET\SLNET_MATLABCentral\64696\magicformula.mdl",1,1,1,2.7355451,161,161,0
 8918,"C:\work\data\SLNET\SLNET_MATLABCentral\64713\Three_Phase_Circuit_Breaker.mdl",1,1,1,4.8365649,319,319,0
 8919,"C:\work\data\SLNET\SLNET_MATLABCentral\64714\definite_overcurrent_relay.mdl",1,1,1,4.5907194,190,190,0
-8920,"C:\work\data\SLNET\SLNET_MATLABCentral\64893\Differential_digital_protection_for_three_phase_transformer.mdl",1,1,1,9.9506264,319,-2,0
+8920,"C:\work\data\SLNET\SLNET_MATLABCentral\64893\Differential_digital_protection_for_three_phase_transformer.mdl",1,1,1,9.9506264,604,604,0
 8921,"C:\work\data\SLNET\SLNET_MATLABCentral\64911\quasiZSI_1Ph_SBC.mdl",1,1,1,6.0670116,232,232,0
 8922,"C:\work\data\SLNET\SLNET_MATLABCentral\64967\Hysterisis_Controller_Inverter_Amit_File_Exchange.mdl",1,1,1,6.1544406,350,350,0
 8923,"C:\work\data\SLNET\SLNET_MATLABCentral\64993\Nouveau dossier\tp02_FL_control_MCC.mdl",1,1,1,1.5992359,61,61,0

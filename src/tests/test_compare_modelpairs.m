@@ -25,6 +25,9 @@ function csvData = runLoop(obf_models, csvData, csvFile)
         [num_blocks, simu_result] = get_comparator(model_path);
 
         obf_model_name = lookup_obf_model(model_path, m);
+        if length(obf_model_name) >= 64
+            obf_model_name = [obf_model_name(1:min(end-4, 52)) num2str(m) obf_model_name(end-3:end)];
+        end
         if ~ismember(obf_model_name, {obf_models.name})
             fprintf("\n NO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUNDNO SAVE FOUND NO SAVE FOUND!\n")
             continue
