@@ -85,7 +85,7 @@ function obfuscateModel(sys, parentSys, varargin)
     
     %% Recurse Model References
     if ~removemodelreferences && recursemodels
-        refs = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'ModelReference');
+        refs = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ModelReference');
         if ~iscell(refs)
             refs = {refs};
         end

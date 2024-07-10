@@ -47,19 +47,26 @@ end
 
 function csvData = runLoop(models, csvData, csvFile, args)
     for n = 1:length(models)
-        m = fibonacci(n);
-        
+        m = n;
+        % m = fibonacci(n+1);
+        % if m > length(models)
+        %     break
+        % end
+        bdclose('all')
+
         model = models(m);
         fprintf("%i %s\n", m, model.name)
-        close_system(model.name(1:end-4), 0)
+        
+        
         try
             model_path = [model.folder filesep model.name];
+            new_model_path = ['C:\tmp\obfmodels\o' num2str(n) model.name(end-3:end)];
             sys = load_system(model_path);
             metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             loadable = 1;
         catch ME
             loadable = 0;
-            csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, 0, NaN, NaN, NaN, NaN, NaN});
+            csvData = append_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN, NaN});
             continue %model is broken
         end
         sys = get_param(sys, 'Name');
@@ -79,9 +86,13 @@ function csvData = runLoop(models, csvData, csvFile, args)
             time = toc;
             locked = 0;
             success = 1;
-            metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             try
-                save_system(sys, ['C:\tmp\obfmodels\' model.name(1:min(end-4, 52)) num2str(m) model.name(end-3:end)], 'SaveDirtyReferencedModels', 'on')
+                obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
+                save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
+                bdclose('all')
+                sys = load_system(obf_new_model_path);
+                metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+                copyfile(model_path, new_model_path)
                 saveable = 1;
             catch ME
                 saveable = 0;
@@ -92,14 +103,14 @@ function csvData = runLoop(models, csvData, csvFile, args)
         end
 
 
-        csvData = append_to_table(csvData, csvFile, {m, model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
-        bdclose('all')
+        csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
     end
 end
 
 function new_table = append_to_table(old_table, filename, new_data)
-    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'});
+    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'});
     new_table = [old_table; new_data];
+    cd('C:\work\Obfuscate-Model\src\tests')
     writetable(new_table, filename);
 end
 
@@ -110,7 +121,7 @@ end
 function csvData = readCsv(filename)
     if exist(filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
-        header = {'ID', 'ModelPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'};
+        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'};
         % Convert the header to a table and write it to a CSV file
         writetable(cell2table(header), filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');

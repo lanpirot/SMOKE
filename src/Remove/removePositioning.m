@@ -12,7 +12,7 @@ function removePositioning(sys)
 
     %for all subsystems:
     sys = get_param(sys, 'handle');
-    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 

@@ -12,11 +12,11 @@ function removeSizes(sys)
 
     %for all subsystems:
     sys = get_param(sys, 'handle');
-    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 
-        blocks = find_system(subsystems(i), 'SearchDepth', '1', 'type', 'Block');
+        blocks = find_system(subsystems(i), 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'SearchDepth', '1', 'type', 'Block');
         for j = 1:length(blocks)
             % create a tmp block from which to steal the default sizes
             try

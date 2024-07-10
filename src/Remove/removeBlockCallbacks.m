@@ -5,7 +5,7 @@ function removeBlockCallbacks(sys)
 % See: https://www.mathworks.com/help/simulink/ug/block-callbacks.html
 
     sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     callbacks = {'CopyFcn' 'DeleteFcn' 'LoadFcn' 'ModelCloseFcn' 'PreSaveFcn' 'PostSaveFcn' 'InitFcn' 'StartFcn' 'PauseFcn' 'ContinueFcn' 'StopFcn' 'NameChangeFcn' 'ClipboardFcn' 'DestroyFcn' 'PreCopyFcn' 'OpenFcn' 'CloseFcn' 'PreDeleteFcn' 'ParentCloseFcn' 'MoveFcn' 'PreSaveFcn'};
     for i = 1:length(blocks)
         for c = 1:length(callbacks)

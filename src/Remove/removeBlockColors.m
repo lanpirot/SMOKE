@@ -2,7 +2,7 @@ function removeBlockColors(sys)
 % REMOVEBLOCKCOLORS Remove all block coloring from the model.
 
     sys = get_param(sys, 'handle');
-    allBlks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    allBlks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     for i = 1:length(allBlks)
         try
             set_param(allBlks(i), 'ForegroundColor', 'black');

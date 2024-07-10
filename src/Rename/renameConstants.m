@@ -4,7 +4,7 @@ function renameConstants(sys)
 % constant has a variable value instead of a number.
 
     sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'Constant');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'Constant');
     
     for i = 1:length(blocks)
         val = get_param(blocks(i), 'Value');

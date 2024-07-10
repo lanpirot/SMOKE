@@ -2,14 +2,14 @@ function renameDSs(sys)
 % RENAMEDSS Give all Data Store Memory, Read, and Write blocks with generic
    
     sys = get_param(sys, 'handle');
-    datastores = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreMemory');
+    datastores = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreMemory');
     renamed_writes = [];
     renamed_reads = [];
     
     for dsm = 1:length(datastores)
         datastorename  = get_param(datastores(dsm), 'DataStoreName');
-        writes = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreWrite', 'DataStoreName', datastorename);
-        reads  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreRead', 'DataStoreName', datastorename);
+        writes = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreWrite', 'DataStoreName', datastorename);
+        reads  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreRead', 'DataStoreName', datastorename);
         
         % Memory
         for i = 1:2^16
@@ -38,8 +38,8 @@ function renameDSs(sys)
     end
     
     % Fix dangline reads/writes
-    dangling_writes = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreWrite');
-    dangling_reads  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'DataStoreRead');
+    dangling_writes = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreWrite');
+    dangling_reads  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreRead');
     dangling_writes = setdiff(dangling_writes, renamed_writes);
     dangling_reads  = setdiff(dangling_reads, renamed_reads);
     

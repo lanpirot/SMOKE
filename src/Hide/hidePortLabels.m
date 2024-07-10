@@ -19,7 +19,7 @@ function hidePortLabels(sys, varargin)
         hide = true;
     end
     
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     
     if hide
         for i = 1:length(blocks)

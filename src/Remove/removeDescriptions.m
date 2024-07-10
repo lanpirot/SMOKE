@@ -3,9 +3,9 @@ function removeDescriptions(sys)
 % annotations.
 
     sys = get_param(sys, 'handle');
-    all = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
-    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation')];
-    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line')];
+    all = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block', 'Variants', 'AllVariants');
+    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'annotation')];
+    all = [all; find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'line')];
     for i = 1:length(all)
         try
             set_param(all(i), 'Description', '');

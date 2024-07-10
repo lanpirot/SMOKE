@@ -2,7 +2,7 @@ function renameSimFcns(sys, parentSys)
 % RENAMESIMFCNS Rename Simulink Functions to generic names, and update callers.
     % Triggers
     sys = get_param(sys, 'handle');
-    triggers = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'TriggerPort');
+    triggers = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'TriggerPort');
     global fcnNum;
     if isempty(fcnNum)
         fcnNum = 1;

@@ -2,7 +2,7 @@ function removeAnnotations(sys)
 % REMOVEANNOTATIONS Remove all annotations from the model. 
 % Removes any text, area, or image annotations.
     sys = get_param(sys, 'handle');
-    annotations = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'annotation');
+    annotations = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'annotation');
     for a = 1:length(annotations)
         try
             delete(annotations(a))

@@ -3,7 +3,7 @@ function removeLibraryLinks(sys)
 % blocks or other libraries.
 
     sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     simscapestr = 'Simscape';
     lsimscapestr = length(simscapestr);
     for i = 1:length(blocks)

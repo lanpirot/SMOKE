@@ -3,7 +3,7 @@ function removeMasks(sys)
 % used for custom blocks, which the user may not want to reveal.
 
     sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     mask_params = {'MaskDisplay' 'Mask' 'MaskInitialization' 'MaskCallbackString'};
     for i = 1:length(blocks)
         try

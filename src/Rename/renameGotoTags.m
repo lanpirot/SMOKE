@@ -3,12 +3,12 @@ function renameGotoTags(sys)
 % Should be run from the root to avoid overlapping names.
 
     sys = get_param(sys, 'handle');
-    gotos = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'Goto');
+    gotos = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'Goto');
     changedFroms = [];
 
     for i = 1:length(gotos)
         tag = get_param(gotos(i), 'GotoTag');
-        froms = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'From', 'GotoTag', tag);
+        froms = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'From', 'GotoTag', tag);
 
         % Change goto
         set_param(gotos(i), 'GotoTag', ['GotoFrom' num2str(i)]);
@@ -22,7 +22,7 @@ function renameGotoTags(sys)
 
     % Change dangling Froms
     % TODO: Change froms with the same GotoTag to the same generic GotoTag
-    froms = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'From');
+    froms = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'From');
     leftOver = setdiff(getfullname(froms), getfullname(changedFroms));
     for k = 1:length(leftOver)
          set_param(leftOver{k}, 'GotoTag', ['GotoFrom' num2str(k)]);

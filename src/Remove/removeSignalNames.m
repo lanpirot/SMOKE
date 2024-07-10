@@ -13,7 +13,7 @@ function removeSignalNames(sys)
 
     sys = get_param(sys, 'handle');
     % Lines
-    lines = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'type', 'line');
+    lines = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'line');
     for i = 1:length(lines)
         try
             set(lines(i), 'SignalPropagation', 'off');
@@ -24,7 +24,7 @@ function removeSignalNames(sys)
     end
 
     % Ports
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     for j = 1:length(blocks)
          pc = get_param(gcb, 'PortHandles');
          for k = 1:length(pc.Outport)

@@ -11,19 +11,14 @@ function removeDialogParameters(sys)
 %       Resets all Dialog Parameters of all blocks.
 
     sys = get_param(sys, 'handle');
-    block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block');
-    l = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'));
+    block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     for i = 1:length(block)
-        if i == 105
-            %keyboard
-        end
         %fprintf("i %i",i)
         try
             curr_block = block(i);
             curr_parent = get_param(curr_block, 'Parent');
             tmp_block_path = [curr_parent '/' 'tmpblock'];
             tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);
-            l = l+1;
             
             if ~isempty(get_param(tmp_block, 'DialogParameters'))
                 params = fields(get_param(tmp_block, 'DialogParameters'));
@@ -54,15 +49,10 @@ function removeDialogParameters(sys)
         % Clean up: Remove tmp block
         try
             delete_block(tmp_block_path)
-            l = l - 1;
         catch ME
             if ~strcmp(ME.identifier, 'Simulink:Commands:InvSimulinkObjectName')
                 rethrow(ME)
             end
-        end
-
-        if l ~= length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on'))
-            %keyboard
         end
     end
 end

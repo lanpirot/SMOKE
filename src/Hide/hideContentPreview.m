@@ -18,7 +18,7 @@ function hideContentPreview(sys, varargin)
         hide = true;
     end
     
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'BlockType', 'SubSystem');
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     blocks = get_param(blocks, 'Handle');
     
     if hide
