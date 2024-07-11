@@ -22,7 +22,8 @@
 \input{macros}
 
 \newcommand{\ToolName}{SMOKE: Simulink Model Obfuscation Keeping structurE\@\xspace}
-\newcommand{\location}{\file{Location}\@\xspace}
+\newcommand{\toolname}{SMOKE\@\xspace}
+\newcommand{\location}{\file{SMOKEdir}\@\xspace}
 
 \newcommand{\menu}[2]{%
 	\ifthenelse{\equal{#1}{1}}{SMOKEGUI}{}%
@@ -70,12 +71,12 @@
 
 % Briefly, what is the tool?
 % Provide any background or references.
-\ToolName removes, renames, and/or hides various details of a \Simulink model in order to hide or remove confidential information.
+\ToolName is a tool that removes, renames, and/or hides various details of a \Simulink model in order to hide or remove confidential information.
 % Why is it useful?
 Hiding can be useful for taking screenshots that can be shared or published. Removing, especially removing functionality, can be useful
 for sharing the model files itself. Such model files may then be studied, modified or published by interested third parties.
- \ToolName can remove most model aspects, while leaving the model structure intact. The user 
-can decide which aspects to leave, which one's to remove, depending on what is sensitive, and what is fine to share.
+ \toolname can remove most model aspects, while leaving the model structure intact. The user 
+can decide which aspects to leave intact, and which one's to remove, depending on what is sensitive, and what is fine to share.
 
 \paragraph{Disclaimer:} The authors of this tool make no guarantees that all proprietary/confidential information is indeed removed from the Simulink model file. Users should inspect the model to verify that no proprietary/confidential remains according to their needs.
 
@@ -90,7 +91,7 @@ can decide which aspects to leave, which one's to remove, depending on what is s
 % How to Use the Tool
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{How to Use the Tool}
-This section describes what must be done to setup the \ToolName, as well as how to use the tool.
+This section describes what must be done to setup the \toolname, as well as how to use the tool.
 
 %--------------------------------------- 
 % What needs to be done before the tool can be used? 
@@ -99,17 +100,17 @@ This section describes what must be done to setup the \ToolName, as well as how 
 \subsection{Prerequisites and Installation}
 
 \begin{enumerate}
-  \item Use \Matlab/\Simulink 2024a or newer.
-	\item To install the tool, use one of the following approaches to download all necessary files to some \location of your choice:
+  \item Use \Matlab/\Simulink 2024a or newer. It may work with older versions, though.
+	\item To install the tool, use one of the following approaches to download all necessary files to a location, like \location of your choice:
 	\begin{enumerate}
-		\item Download the \file{.zip} files of the \href{https://github.com/lanpirot/Obfuscate-Model}{\ToolName repository} and for the dependency \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility}. Unzip both at \location.
-		\item Using a terminal at \location, clone the \ToolName repository and its dependency: 
+		\item Download the \file{.zip} files of the \href{https://github.com/lanpirot/SMOKE}{\toolname repository} and for the dependency \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility}. Unzip both at \location.
+		\item Using a terminal at \location, clone the \toolname repository and its dependency: 
 			\begin{verbatim}
-			git clone --recursive https://github.com/McSCert/Obfuscate-Model
+			git clone --recursive https://github.com/lanpirot/SMOKE
 			git clone --recursive https://github.com/McSCert/Simulink-Utility
 			\end{verbatim}
 	\end{enumerate}
-	\item Add the \location of \ToolName and the dependency and all their subfolders to your \mpath. Do this step both for \ToolName and Simulink-Utility! To do this, use one of the following:
+	\item Add the \location of \toolname and the dependency and all their subfolders to your \mpath. Do this step both for \toolname and Simulink-Utility! To do this, use one of the following:
 	\begin{enumerate}
 		\item Use the \matlab current folder panel. Move to the location in the folder panel, then right-click on the folder $\longrightarrow$ Add to Path $\longrightarrow$ Selected Folders and Subfolders.
 		\item In the \matlab console, use \cmd{addpath(genpath('\location'))}
@@ -118,13 +119,13 @@ This section describes what must be done to setup the \ToolName, as well as how 
 	\item Ensure your \simulink model, you want to obfuscate, is open and unlocked.
 \end{enumerate}
 
-\paragraph{Troubleshooting:} If running the command ``\cmd{which ObfuscateModelGUI}'' indicates that the script is not found, or while executing the program \cmd{Unrecognized function or variable 'getInput'.} gets printed in the console, then the \ToolName and dependency directorie needs to be added to the \mpath. For more information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
+\paragraph{Troubleshooting:} If running the command ``\cmd{which SMOKEgui}'' indicates that the script is not found, or while executing the program \cmd{Unrecognized function or variable 'getInput'.} gets printed in the console, then \toolname and dependency directories needs to be added to the \mpath. For more information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
 
 %---------------------------------------
 % How/when do you access the tool?
 %---------------------------------------
 \subsection{Getting Started}
-\ToolName can be launched by double-clicking the \file{ObfuscateModelGUI.mlapp} file, or by running the command \cmd{ObfuscateModelGUI} from the Command Window. This will open the Graphical User Interface (GUI) shown in \figurename~\ref{fig:contextMenu}.
+\toolname can be launched by double-clicking the \file{SMOKEgui.mlapp} file, or by running the command \cmd{SMOKEgui} from the Command Window. This will open the Graphical User Interface (GUI) shown in \figurename~\ref{fig:contextMenu}.
 
 \begin{figure}[htb!]
 	\centering
@@ -140,32 +141,37 @@ This section describes what must be done to setup the \ToolName, as well as how 
 \subsection{Functionality}
 This section describes the tool functionality when being used from the GUI (Figure~\ref{fig:contextMenu}). Each section describes one of the sub-panels of the GUI.
 
-\subsubsection{Recurse into Model References}
-This check-box will apply the removing (Section~\ref{lbl:remove}), renaming (Section~\ref{lbl:rename}), and hiding (Section~\ref{lbl:hide}) options inside of any \href{https://de.mathworks.com/help/simulink/model-reference.html}{referenced models}.
+\subsubsection{Model to be obfuscated}
+The top line states the currently loaded model (if any). If this is blank, ensure to load a Simulink model. Also make sure, that the model is unlocked, as \toolname only works on unlocked models.
 
-\subsubsection{Remove}
-\label{lbl:remove}
-The options in the \emph{Remove} panel will discard elements of the model.
+\subsubsection{Top Checkboxes}
+\begin{itemize}
+	\item Model References -- The use of a \href{https://www.mathworks.com/help/simulink/slref/model.html}{model} block introduces a reference to another model. This option resets all model reference blocks so that they no longer point to other models. \emph{Note: This may impact the model functionality.}
+	\item Recurse into Model References -- This check-box will apply all changes chosen in Sections~\ref{lbl:leftside}, and \ref{lbl:rightside} inside of any \href{https://de.mathworks.com/help/simulink/model-reference.html}{referenced models}.
+	\item Library Links -- Library \href{https://www.mathworks.com/help/simulink/ug/creating-and-working-with-linked-blocks.html}{links} can be used in a model to reference blocks that reside in other libraries. This option removes (or ``breaks") all library links so that blocks are stored directly in the model instead of the library. This means that the model is no longer dependant on external libraries.
+\end{itemize}
+
+\subsubsection{Left Panel: Functional Sanitization}
+\label{lbl:leftside}
+Here, functionality of the model will be removed, either inside of masks, block callbacks, constant values, stateflow internals, or Simulink Functions. All options leave the model structure intact.
+\begin{itemize}
+	\item Masks -- Block \href{https://www.mathworks.com/help/simulink/ug/block-masks.html}{masks} are commonly used to customize the block appearance of custom blocks. This option removes the masks of all blocks. Masks may include special code, that is also removed.
+	\item Block Callbacks -- Blocks may have \href{https://www.mathworks.com/help/simulink/ug/block-callbacks.html}{callbacks}, that are called on events, like moving them, saving the model etc. They can range from simple (e.g. is another block still present?) to complex.
+	\item Dialog Parameters -- Blocks can have all kinds of \href{https://www.mathworks.com/help/simulink/slref/block-specific-parameters.html}{parameters} set. Activate this option to reset them to their default values. This means dialog parameters are a way to store constants in a model.
+	\item Constants -- Reset all \href{https://www.mathworks.com/help/simulink/slref/constant.html}{constants} to 1 values.
+	\item Functions -- Remove all MATLAB functions from \href{https://www.mathworks.com/help/simulink/ug/what-is-a-matlab-function-block.html}{MATLAB function blocks}. Inside of a function block, arbitrarily complex functions may be hidden.
+	\item Simulink Function Arguments -- A \simfunc can have inputs and outputs using \argin and \argout blocks. This option renames the \param{argument name} of \argin and \argout blocks to be generic (\eg u1 for an input, y1 for an output).
+	
+	\item Stateflow -- These options rename the various named \href{https://www.mathworks.com/help/stateflow/ug/overview-of-stateflow-objects.html}{Stateflow elements} to have generic names. Currently inputs, outputs, events, boxes, and states are renamed. Transitions are removed.
+\end{itemize}
+
+
+\subsubsection{Right Panel: Optical Obfuscations}
+\label{lbl:rightside}
+The options in the \emph{Right Panel} are of optical nature, only. Use this for screenshots, while leaving the functionality intact.
 
 \begin{itemize}
-	\item Masks -- Block \href{https://www.mathworks.com/help/simulink/ug/block-masks.html}{masks} are commonly used to customize the block appearance of custom blocks. This option removes the masks of all blocks. 
-	
-	\item Library Links -- Library \href{https://www.mathworks.com/help/simulink/ug/creating-and-working-with-linked-blocks.html}{links} can be used in a model to reference blocks that reside in other libraries. This option removes (or ``breaks") all library links so that blocks are stored directly in the model instead of the library. This means that the model is no longer dependant on external libraries.
-	
-	\item Model References -- The use of a \href{https://www.mathworks.com/help/simulink/slref/model.html}{model} block introduces a reference to another model. This option resets all model reference blocks so that they no longer point to other models. \emph{Note: This may impact the model functionality.}
-	
-	\item Signal Names -- This option turns off \href{https://www.mathworks.com/help/simulink/ug/signal-label-propagation.html}{signal propagation}.
-	
-	\item DocBlocks -- A \docblock stores \href{https://www.mathworks.com/help/simulink/slref/docblock.html}{documentation} about the model. This options removes all \docblock{s}.
-	
-	\item Annotations -- This option deletes all text, area, or image \href{https://www.mathworks.com/help/simulink/ug/annotations.html}{annotations}.
-	
-	\item Descriptions -- This options removes the \param{description} information of \href{https://www.mathworks.com/help/simulink/ug/signal-basics.html#bs9gzwp}{lines}, \href{https://www.mathworks.com/help/simulink/ug/block-properties-dialog-box.html}{blocks}, and annotations. 
-	
-	\item Block Callbacks -- Blocks can have custom \href{https://www.mathworks.com/help/simulink/ug/block-callbacks.html}{callbacks}. This option removes all callbacks.
-	
 	\item Model Information -- A \Simulink model stores \href{https://www.mathworks.com/help/simulink/ug/managing-model-versions.html}{information} about itself, such as its creator's name and version number (Figure~\ref{fig:model_history}). This option resets this data.
-	
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=.97\textwidth]{../figs/ModelHistory}
@@ -173,41 +179,35 @@ The options in the \emph{Remove} panel will discard elements of the model.
 	\label{fig:model_history}
 \end{figure}
 	
-	\item Colors -- These options remove the colours of blocks and annotations so that they revert to their default color.
-\end{itemize}
+	\item DocBlocks -- A \docblock stores \href{https://www.mathworks.com/help/simulink/slref/docblock.html}{documentation} about the model. This options removes all \docblock{s}.
+	
+	\item Annotations -- This option deletes all text, area, or image \href{https://www.mathworks.com/help/simulink/ug/annotations.html}{annotations}.
 
-\subsubsection{Rename}
-\label{lbl:rename}
-The options in the \emph{Rename} panel will rename elements of the model to use generic names.
+	\item Descriptions -- This options removes the \param{description} information of \href{https://www.mathworks.com/help/simulink/ug/signal-basics.html#bs9gzwp}{lines}, \href{https://www.mathworks.com/help/simulink/ug/block-properties-dialog-box.html}{blocks}, and annotations. 
 
-\begin{itemize}
-	\item Block Names -- Each block in a model has a \param{name} that is typically displayed underneath the block. This option renames all block names to a generic name based on the block type. For example, an \inport block will be renamed to Inport1.
+	\item Signal Names -- This option turns off \href{https://www.mathworks.com/help/simulink/ug/signal-label-propagation.html}{signal propagation}.
+
+\item Subsystem Content Preview -- This option turns off the \href{https://www.mathworks.com/help/simulink/ug/preview-content-of-hierarchical-items.html}{content preview} that is displayed in blocks such as subsystems.
 	
-	\item Constants -- Each constant block has a \param{value} that is a number or a variable name. This option renames any values that are variable names to be generic (\eg Constant1). Numerical constants will remain. \emph{Note: You must manually change the definition of the data to match the new name. This tool does not currently rename data in the base workspace or data dictionaries.}
+	\item Subsystem Port Labels -- This option hides the port labels shown on blocks such as subsystems.
 	
-	\item Goto/From Tags -- A \goto block has a \param{goto tag} that matches it to its \from blocks. This option renames tags to generic names (\eg GotoFrom1) and renames any matching \from blocks as well.
-	
+	\item Block Names -- Each block in a model has a \param{name} that is typically displayed underneath the block. This option renames all block names to a generic name based on the block type. For example, an \inport block will be renamed to Inport1. They are also hidden from view.
+
+	\item Signal Names – This option turns off \href{https://www.mathworks.com/help/simulink/ug/signal-label-propagation.html}{signal propagation}.
+
 	\item Data Store Memory -- A \DSM block has a \param{data store name}. This option renames all  \DSM blocks to be generic (\eg DataStore1) as well as all associated \DSR and \DSW blocks.
-	
-	\item Simulink Function Arguments -- A \simfunc can have inputs and outputs using \argin and \argout blocks. This option renames the \param{argument name} of \argin and \argout blocks to be generic (\eg u1 for an input, y1 for an output).
 
 	\item Simulink Function Names -- The trigger within a \simfunc specifies the function's name. This option renames it to a generic name (\eg f1), and updates any corresponding \simfunccaller blocks to match.
 	
-	\item Stateflow -- These options rename the various named \href{https://www.mathworks.com/help/stateflow/ug/overview-of-stateflow-objects.html}{Stateflow elements} to have generic names. Currently inputs, outputs, events, boxes, and states are renamed.
+	\item Goto/From Tags -- A \goto block has a \param{goto tag} that matches it to its \from blocks. This option renames tags to generic names (\eg GotoFrom1) and renames any matching \from blocks as well.
+	
+	\item Colors -- These options remove the colours of blocks and annotations so that they revert to their default color.
+
+	\item Block Sisez -- All block sizes and shapes are reset to their default values.
+
+	\item Auto Positioning -- Simulink's auto positioning function is called. Each call to it may result in a different diagram!
 \end{itemize}
 
-\subsubsection{Hide}
-\label{lbl:hide}
-The options in the \emph{Hide} panel will hide elements of the model from view.
-
-\begin{itemize}
-	\item Block Names -- This option hides the name of a block from view.
-	
-	\item Subsystem Content Preview -- This option turns off the \href{https://www.mathworks.com/help/simulink/ug/preview-content-of-hierarchical-items.html}{content preview} that is displayed in blocks such as subsystems.
-	
-	\item Subsystem Port Labels -- This option hides the port labels shown on blocks such as subsystems.
-
-\end{itemize}
 
 %---------------------------------------
 % What else does the tool do?
@@ -220,18 +220,18 @@ The options in the \emph{Hide} panel will hide elements of the model from view.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Example}
 
-Use the command \demoName in the \Simulink Command Window to open the example model, shown in Figure~\ref{fig:demo1}. To run the tool, run the command \cmd{ObfuscateModelGUI} from the Command Window, and then press the \cmd{Obfuscate} button. The resulting model is given in Figure~\ref{fig:demo2}. We can see that the colors, annotations, masks, names, port labels, and many other elements have been removed, renamed, or hidden in the model.
+Use the command \demoName in the \Simulink Command Window to open the example model, shown in Figure~\ref{fig:demo1}. To run the tool, run the command \cmd{SMOKEgui} from the Command Window, and then press the \cmd{Obfuscate} button. The resulting model is given in Figure~\ref{fig:demo2}. We can see that the colors, annotations, masks, names, port labels, and many other elements have been removed, renamed, or hidden in the model. Furthermore, all the functionality of the model is removed, because constant values, block parameters, functions are reset and masks and callbacks are removed.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=.97\textwidth]{../figs/Demo1}
+	\includegraphics[width=.97\textwidth]{../figs/sldemo_before.pdf}
 	\caption{Original demo model.}
 	\label{fig:demo1}
 \end{figure}
 
 \begin{figure}[htb]
 	\centering
-	\makebox[\textwidth][c]{\includegraphics[width=1.25\textwidth]{../figs/Demo2_annotated}}
+	\makebox[\textwidth][c]{\includegraphics[width=1.25\textwidth]{../figs/sldemo_pos.pdf}}
 	\caption{Resulting model after obfuscation.}
 	\label{fig:demo2}
 \end{figure}
