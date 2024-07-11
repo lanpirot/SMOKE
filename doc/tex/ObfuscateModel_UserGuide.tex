@@ -21,15 +21,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \input{macros}
 
-\newcommand{\ToolName}{Obfuscate Model Tool\@\xspace}
+\newcommand{\ToolName}{SMOKE: Simulink Model Obfuscation Keeping structurE\@\xspace}
 \newcommand{\location}{\file{Location}\@\xspace}
 
 \newcommand{\menu}[2]{%
-	\ifthenelse{\equal{#1}{1}}{ObfuscateModelGUI}{}%
+	\ifthenelse{\equal{#1}{1}}{SMOKEGUI}{}%
   	\ifthenelse{\equal{#1}{2}}{}{}%
 }
 
-\newcommand{\toolFolder}{\cmd{ObfuscateModel}}
+\newcommand{\toolFolder}{\cmd{SMOKEfolder}}
 \newcommand{\demoName}{\cmd{sldemo\_auto\_climatecontrol}\@\xspace}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,7 +48,9 @@
 
 \begin{figure}
 	\centering
-	\includegraphics[]{../figs/McSCert_Logo.pdf} \\
+	\includegraphics[width=.2\textwidth]{../figs/uni_bern_logo.pdf}\\ 
+	Software Engineering Group, University of Bern\\
+	\includegraphics[width=.2\textwidth]{../figs/McSCert_Logo.pdf} \\
 	McMaster Centre for Software Certification (McSCert)
 \end{figure}
 
@@ -68,9 +70,12 @@
 
 % Briefly, what is the tool?
 % Provide any background or references.
-The \ToolName removes, renames, and/or hides various details of a \Simulink model in order to hide confidential information.
+\ToolName removes, renames, and/or hides various details of a \Simulink model in order to hide or remove confidential information.
 % Why is it useful?
-This can be useful for eliminating proprietary details when sending models to third-parties, or even by removing details from models in order to create images suitable for publication.
+Hiding can be useful for taking screenshots that can be shared or published. Removing, especially removing functionality, can be useful
+for sharing the model files itself. Such model files may then be studied, modified or published by interested third parties.
+ \ToolName can remove most model aspects, while leaving the model structure intact. The user 
+can decide which aspects to leave, which one's to remove, depending on what is sensitive, and what is fine to share.
 
 \paragraph{Disclaimer:} The authors of this tool make no guarantees that all proprietary/confidential information is indeed removed from the Simulink model file. Users should inspect the model to verify that no proprietary/confidential remains according to their needs.
 
