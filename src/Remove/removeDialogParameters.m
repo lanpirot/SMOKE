@@ -13,7 +13,7 @@ function removeDialogParameters(sys)
     sys = get_param(sys, 'handle');
     block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     for i = 1:length(block)
-        %fprintf("i %i",i)
+        warning('off', 'all');
         try
             curr_block = block(i);
             curr_parent = get_param(curr_block, 'Parent');
@@ -24,9 +24,23 @@ function removeDialogParameters(sys)
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
-                    %fprintf("p %i",p)
-                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice'}) %don't ruin structure, like mux/demux
+                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port'}) 
+                        %these exceptions are mostly to not ruin the
+                        %structure of the model, like mux/demux, but also
+                        %because they may trigger MATLAB hard crashes
                         continue
+                    end
+                    try
+                        if isequal(get_param(curr_block, params{p}), get_param(tmp_block, params{p}))
+                            %often MATLAB hard crashes, even if the
+                            %parameters are not changed --> skip
+                            continue
+                        end
+                    catch ME
+
+                        if ~ismember(ME.identifier, {'Simulink:Libraries:FailedToLoadLibraryForBlock'})
+                            rethrow(ME)
+                        end
                     end
                     try
                         set_param(curr_block, params{p}, get_param(tmp_block, params{p}))
@@ -36,7 +50,6 @@ function removeDialogParameters(sys)
                         %    rethrow(ME)
                         %end
                     end
-                    %fprintf('%i %i\n', p, length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on')))
                 end
             end
             set_param(curr_block, 'MoveFcn', '')

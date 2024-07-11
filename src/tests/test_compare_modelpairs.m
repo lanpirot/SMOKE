@@ -7,7 +7,6 @@ function test_compare_modelpairs()
     bdclose('all')
     warning('off', 'all');
     tableBefore = readtable('results_scalability.csv');
-    models = find_models(tableBefore);
 
     csvAfter = 'results_compare.csv';
     if exist(csvAfter, 'file') ~= 2
@@ -19,18 +18,21 @@ function test_compare_modelpairs()
     else
         tableAfter = readtable(csvAfter);
     end
-    runLoop(models, tableAfter, csvAfter);
+    runLoop(tableAfter, csvAfter);
 end
 
-function runLoop(models, table, csvFile)
+function runLoop(table, csvFile)
     c_same = 0;
     c_diff = 0;
-    for m = 1:length(models)
-        if ~isnan(table{m, 'OrigCompilable'}) && ~isnan(table{m, 'ObfCompilable'})
+    for m = 1:height(table)
+        if table{m, 'Saveable'} ~= 1 || (~isnan(table{m, 'OrigCompilable'}) && ~isnan(table{m, 'ObfCompilable'}))
             continue
         end
-        comp_orig = is_compilable(models(m).original_file);
-        comp_obf = is_compilable(models(m).obf_file);
+        orig_path = table{m, 'NewPath'}{1};
+        obf_path = [orig_path(1:end-4) '_obf' orig_path(end-3:end)];
+
+        comp_orig = is_compilable(orig_path);
+        comp_obf = is_compilable(obf_path);
 
         table{m, 'OrigCompilable'} = comp_orig;
         table{m, 'ObfCompilable'} = comp_obf;

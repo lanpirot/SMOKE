@@ -46,22 +46,26 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for n = 1:length(models)
-        m = n;
-        % m = fibonacci(n+1);
-        % if m > length(models)
-        %     break
-        % end
+    for m = 1:length(models)
         bdclose('all')
-
         model = models(m);
         fprintf("%i %s\n", m, model.name)
         
         
         try
             model_path = [model.folder filesep model.name];
-            new_model_path = ['C:\tmp\obfmodels\o' num2str(n) model.name(end-3:end)];
+            new_model_path = ['C:\tmp\obfmodels\o' num2str(m) model.name(end-3:end)];
             sys = load_system(model_path);
+
+            %clean up model for taking accurate measurements:
+            %delete DocBlocks
+            %look inside of read-protected Blocks
+            %delete Masks that prevent looking into read-protected Blocks
+            cleanup(sys)
+            cleanup(sys)
+            cleanup(sys)
+
+
             metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             loadable = 1;
         catch ME
@@ -82,6 +86,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             saveable = NaN;
         else
             tic;
+            addpath C:\work\Obfuscate-Model\src
             obfuscateModel(sys, [], argsmf{:});
             time = toc;
             locked = 0;
@@ -95,16 +100,46 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 copyfile(model_path, new_model_path)
                 saveable = 1;
             catch ME
-                saveable = 0;
-                if ~ismember(ME.identifier, {'Stateflow:studio:LibrarySaveAsWhileModelOpenError' 'Simulink:Commands:SaveModelCallbackError' 'Simulink:SLX:PartHandlerError'})
-                    rethrow(ME)
+                %handle models with broken PreSaveFcn/PostSaveFcns
+                s = get_param(sys, 'handle');
+                blocks = find_system(s, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants');
+                for b = 1:length(blocks)
+                    try
+                        set_param(blocks(b), 'PreSaveFcn', '')
+                        set_param(blocks(b), 'PostSaveFcn', '')
+                    catch ME
+                        
+                    end
                 end
+                obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
+                save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
+                bdclose('all')
+                sys = load_system(obf_new_model_path);
+                metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+                copyfile(model_path, new_model_path)
+                saveable = 1;
             end
         end
 
 
         csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
     end
+end
+
+function cleanup(sys)
+    removeMasks(sys)
+    %sometimes masks need to be removed before read-protection can
+    %be applied
+    %read-protected blocks are not found in original model!
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants');
+    for j=1:length(blocks)
+        try
+            set_param(blocks(j), 'Permissions', 'ReadWrite')
+        catch 
+        end
+    end
+    %docblocks would be counted, as well
+    delete_block(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem', 'MaskType', 'DocBlock'))
 end
 
 function new_table = append_to_table(old_table, filename, new_data)
