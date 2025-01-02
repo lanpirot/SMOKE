@@ -127,6 +127,9 @@ function csvData = runLoop(models, csvData, csvFile, args)
 end
 
 function cleanup(sys)
+    try
+        set_param(sys, 'Lock', 'off');
+    end
     removeMasks(sys)
     %sometimes masks need to be removed before read-protection can
     %be applied
