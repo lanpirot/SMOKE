@@ -46,7 +46,7 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for m = 1:length(models)
+    for m = 20:length(models)
         bdclose('all')
         model = models(m);
         fprintf("%i %s\n", m, model.name)
