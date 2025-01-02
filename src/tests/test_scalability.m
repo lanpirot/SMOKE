@@ -46,7 +46,11 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for m = 20:length(models)
+    for m = 1:length(models)
+        if csvData(m,:).Success ~= 0
+            continue
+        end
+
         bdclose('all')
         model = models(m);
         fprintf("%i %s\n", m, model.name)
@@ -55,7 +59,8 @@ function csvData = runLoop(models, csvData, csvFile, args)
         try
             model_path = [model.folder filesep model.name];
             new_model_path = ['C:\tmp\obfmodels\o' num2str(m) model.name(end-3:end)];
-            sys = load_system(model_path);
+            copyfile(model_path, new_model_path)
+            sys = load_system(new_model_path);
 
             %clean up model for taking accurate measurements:
             %delete DocBlocks
@@ -66,7 +71,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             cleanup(sys)
 
 
-            blocks_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+            blocks_before = metrics_blocks(sys);
             loadable = 1;
         catch ME
             loadable = 0;
@@ -87,18 +92,13 @@ function csvData = runLoop(models, csvData, csvFile, args)
         else
             tic;
             addpath C:\work\Obfuscate-Model\src
-            SMOKE(sys, [], argsmf{:});
+            %SMOKE(sys, [], argsmf{:});
             time = toc;
             locked = 0;
             success = 1;
             try
-                obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
-                save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
-                bdclose('all')
-                sys = load_system(obf_new_model_path);
-                blocks_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
-                copyfile(model_path, new_model_path)
-                saveable = 1;
+                [saveable, sys] = try_save(new_model_path, model, sys);
+                blocks_after = metrics_blocks(sys);
             catch ME
                 %handle models with broken PreSaveFcn/PostSaveFcns
                 s = get_param(sys, 'handle');
@@ -111,19 +111,26 @@ function csvData = runLoop(models, csvData, csvFile, args)
                         
                     end
                 end
-                obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
-                save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
-                bdclose('all')
-                sys = load_system(obf_new_model_path);
-                blocks_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
-                copyfile(model_path, new_model_path)
-                saveable = 1;
+                saveable = try_save(new_model_path, model, sys);
+                blocks_after = metrics_blocks(sys);
             end
         end
 
 
         csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, blocks_before, blocks_after, locked});
     end
+end
+
+function metric = metrics_blocks(sys)
+    metric = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+end
+
+function [saveable, sys] = try_save(new_model_path, model, sys)
+    obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
+    save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
+    bdclose('all')
+    sys = load_system(obf_new_model_path);
+    saveable = 1;
 end
 
 function cleanup(sys)

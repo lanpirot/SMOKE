@@ -202,10 +202,6 @@ function SMOKE(sys, parentSys, varargin)
         hideContentPreview(sys);
     end
     
-    if removelibrarylinks
-        removeLibraryLinks(sys)
-    end
-    
     if hideportlabels
         hidePortLabels(sys);
     end
