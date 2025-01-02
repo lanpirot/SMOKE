@@ -1,6 +1,6 @@
 %runs script over a bunch of models
 %tests error-free-ness and runtime
-%compares model metrics before and after
+%compares model metrics before and after anonymization
 
 
 function test_scalability()
@@ -66,7 +66,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             cleanup(sys)
 
 
-            metric_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+            blocks_before = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
             loadable = 1;
         catch ME
             loadable = 0;
@@ -82,12 +82,12 @@ function csvData = runLoop(models, csvData, csvFile, args)
             time = NaN;
             locked = 1;
             success = 0;
-            metric_after = NaN;
+            blocks_after = NaN;
             saveable = NaN;
         else
             tic;
             addpath C:\work\Obfuscate-Model\src
-            obfuscateModel(sys, [], argsmf{:});
+            SMOKE(sys, [], argsmf{:});
             time = toc;
             locked = 0;
             success = 1;
@@ -96,7 +96,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
                 bdclose('all')
                 sys = load_system(obf_new_model_path);
-                metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+                blocks_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
                 copyfile(model_path, new_model_path)
                 saveable = 1;
             catch ME
@@ -115,14 +115,14 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
                 bdclose('all')
                 sys = load_system(obf_new_model_path);
-                metric_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+                blocks_after = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
                 copyfile(model_path, new_model_path)
                 saveable = 1;
             end
         end
 
 
-        csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, metric_before, metric_after, locked});
+        csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, blocks_before, blocks_after, locked});
     end
 end
 
@@ -143,7 +143,7 @@ function cleanup(sys)
 end
 
 function new_table = append_to_table(old_table, filename, new_data)
-    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'});
+    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Blocks_before', 'Blocks_after', 'Locked'});
     new_table = [old_table; new_data];
     cd('C:\work\Obfuscate-Model\src\tests')
     writetable(new_table, filename);
@@ -156,7 +156,7 @@ end
 function csvData = readCsv(filename)
     if exist(filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
-        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Metrics_before', 'Metrics_after', 'Locked'};
+        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Blocks_before', 'Blocks_after', 'Locked'};
         % Convert the header to a table and write it to a CSV file
         writetable(cell2table(header), filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');

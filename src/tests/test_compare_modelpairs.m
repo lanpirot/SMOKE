@@ -1,5 +1,5 @@
 %runs script over a bunch of models
-%tests whether an obfuscated model outputs the same as before, and is
+%tests whether an anonymized model outputs the same as before, and is
 %similarly simulatable, compilable
 
 
