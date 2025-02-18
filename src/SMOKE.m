@@ -17,6 +17,7 @@ function SMOKE(sys, parentSys, varargin)
 %   Example:
 %       obfuscateModel(gcs, [], {'removecolorblocks', 1})
     
+    %% Input Handler
     % If no args are given, run all checks. 
     % If some args are given, only run those enabled.
     if isempty(varargin)
@@ -27,12 +28,6 @@ function SMOKE(sys, parentSys, varargin)
     
     if ~exist('parentSys', 'var')
         parentSys = [];
-    end
-    
-    if strcmp(get_param(sys, 'Lock'), 'on')
-        warning('Model must be unlocked.');
-        %set_param(sys, 'Lock', 'off')
-        return
     end
     
     %% Manage parameters
@@ -82,78 +77,96 @@ function SMOKE(sys, parentSys, varargin)
 
     % Context
     sysfolder               = getInput('sysfolder', varargin, 'No Path given');
+
+    %Location
+    completeModel           = getInput('completeModel', varargin, default);
+    if completeModel
+        obsStartSys = sys;
+    else
+        obsStartSys = gcs;
+    end
+    recurseSubsystems       = getInput('recurseSubsystems', varargin, default) || completeModel;
+
+    %% Collect All Items to be Obfuscated
+
+    if recurseSubsystems
+        sd = inf;
+    else
+        sd = 1;
+    end
+    obsStartSys = get_param(obsStartSys, 'Handle');
+    sys = get_param(sys, 'Handle');
+    blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Block');
+    lines = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Line');
+    datastores = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreMemory');
+    allArgIns   = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants',  'BlockType', 'ArgIn');
+    allArgOuts  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ArgOut');
+    triggers = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'TriggerPort');
+    subsystems = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
+    annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Annotation');
+    docBlocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem', 'MaskType', 'DocBlock');
+    inports = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'type', 'block', 'BlockType', 'Inport');
+    gotos = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'Goto');
+    constants = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'Constant');
+    allArgIns   = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants',  'BlockType', 'ArgIn');
+    allArgOuts  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ArgOut');   
+    froms = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'From');
+    writes = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreWrite');
+    reads  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'DataStoreRead');
+    bla = [blocks; lines; annotations];
+
+
+    %% unlock model
+    unlockModel(obsStartSys, blocks)
+
     
     %% Recurse Model References
     if ~removemodelreferences && recursemodels
-        refs = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ModelReference');
-        if ~iscell(refs)
-            refs = {refs};
-        end
-        if ~isempty(refs)
-            for i = 1:length(refs)
-                try
-                    modelName = get_param(refs{i}, 'ModelName');
-                catch ME
-                    if strcmp(ME.identifier, 'Simulink:protectedModel:ProtectedModelGetParamModelName')
-                        modelName = get_param(refs{i}, 'ModelFile');
-                    else
-                        rethrow(ME)
-                    end
-                end
-                try
-                    load_system([sysfolder filesep modelName]);
-                    obfuscateModel(modelName, sys, varargin{:});
-                    save_system(modelName);
-                    Simulink.ModelReference.refresh(refs{i});
-                    close_system(modelName);
-                catch ME %no referenced model name is given, we do not just try out any name -- as the file is unknown, we also cannot obfuscate it
-                    continue
-                end
-                
-            end
-        end
+        recurseModelReferences(sys, obsStartSys, varargin)
     end
-    
+
     %% Perform Obfuscation
     % Remove parameters and blocks
     if removelibrarylinks
-        removeLibraryLinks(sys)
+        removeLibraryLinks(blocks)
     end
 
     if removemasks
-        removeMasks(sys)
+        removeMasks(blocks)
     end
 
     if removeblockcallbacks
-        removeBlockCallbacks(sys)
+        removeBlockCallbacks(blocks)
     end
     
     if removemodelreferences
-        removeModelReferences(sys)
+        removeModelReferences(blocks)
     end
 
     if removesignalnames
-        removeSignalNames(sys)
-    end
-    
-    if removedocblocks
-        removeDocBlocks(sys)
-    end
-    
-    if removeannotations
-        removeAnnotations(sys)
+        removeSignalNames(lines, blocks)
     end
     
     if removedescriptions
-        removeDescriptions(sys)
+        removeDescriptions(bla)
     end
-
-    if removecolorblocks
-        removeBlockColors(sys)
+    
+    if removedocblocks
+        removeDocBlocks(docBlocks)
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Block');
+        subsystems = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     end
     
     if removecolorannotations
-        removeAnnotationColors(sys)
+        removeAnnotationColors(annotations)
+    end
+    
+    if removeannotations
+        removeAnnotations(annotations, blocks)
+    end
+
+    if removecolorblocks
+        removeBlockColors(blocks)
     end
     
     if removemodelinformation
@@ -161,56 +174,56 @@ function SMOKE(sys, parentSys, varargin)
     end
 
     if removedialogparameters
-        removeDialogParameters(sys)
+        removeDialogParameters(blocks)
     end
 
     if removefunctions
-        removeFunctions(sys)
+        removeFunctions(blocks)
     end
     
-    %removeCustomDataTypes(sys)  % will probably affect functionality
+    removeCustomDataTypes(inports)  % will probably affect functionality
 
-    % Rename
-    if renameblocks
-        renameBlocks(sys)
-    end
-    
+    % Rename    
     if renameconstants
-        renameConstants(sys)
+        renameConstants(constants)
     end
     
     if renamegotofromtag
-        renameGotoTags(sys)
+        renameGotoTags(froms, gotos)
     end
     
     if renamedatastorename
-        renameDSs(sys)
+        renameDSs(datastores, writes, reads)
     end
     
     if renamearguments
-        renameArgs(sys, parentSys);
+        renameArgs(allArgIns, allArgOuts);
     end
     
     if renamefunctions
-        renameSimFcns(sys, parentSys);
+        renameSimFcns(triggers);
     end
     
-    renameStateflow(sys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels);
+    renameStateflow(obsStartSys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels, recurseSubsystems);
     
           
     if hidecontentpreview
-        hideContentPreview(sys);
+        hideContentPreview(subsystems);
     end
     
     if hideportlabels
-        hidePortLabels(sys);
+        hidePortLabels(subsystems);
     end
 
     if removesizes
-        removeSizes(sys)
+        removeSizes([subsystems; sys])
     end
 
     if removepositioning
-        removePositioning(sys)
+        removePositioning([subsystems; sys])
+    end
+
+    if renameblocks
+        renameBlocks(blocks)
     end
 end

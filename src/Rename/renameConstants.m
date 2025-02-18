@@ -1,10 +1,7 @@
-function renameConstants(sys)
+function renameConstants(blocks)
 
 % RENAMECONSTANTS Give all constants generic values. Applies only if the
 % constant has a variable value instead of a number.
-
-    sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'Constant');
     
     for i = 1:length(blocks)
         val = get_param(blocks(i), 'Value');

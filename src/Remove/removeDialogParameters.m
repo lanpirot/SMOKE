@@ -1,4 +1,4 @@
-function removeDialogParameters(sys)
+function removeDialogParameters(blocks)
 % Reset all Dialog Parameters of all blocks
 %
 %   Inputs:
@@ -10,12 +10,10 @@ function removeDialogParameters(sys)
 %   Side Effects:
 %       Resets all Dialog Parameters of all blocks.
 
-    sys = get_param(sys, 'handle');
-    block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
-    for i = 1:length(block)
+    for i = 1:length(blocks)
         warning('off', 'all');
         try
-            curr_block = block(i);
+            curr_block = blocks(i);
             curr_parent = get_param(curr_block, 'Parent');
             tmp_block_path = [curr_parent '/' 'tmpblock'];
             tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);
@@ -24,7 +22,7 @@ function removeDialogParameters(sys)
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
-                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port'}) 
+                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts'}) 
                         %these exceptions are mostly to not ruin the
                         %structure of the model, like mux/demux, but also
                         %because they may trigger MATLAB hard crashes
@@ -38,7 +36,7 @@ function removeDialogParameters(sys)
                         end
                     catch ME
 
-                        if ~ismember(ME.identifier, {'Simulink:Libraries:FailedToLoadLibraryForBlock'})
+                        if ~ismember(ME.identifier, {'Simulink:Libraries:FailedToLoadLibraryForBlock' 'Simulink:DataType:DataTypeObjectNotInScope'})
                             rethrow(ME)
                         end
                     end
@@ -54,7 +52,7 @@ function removeDialogParameters(sys)
             end
             set_param(curr_block, 'MoveFcn', '')
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists' 'Simulink:CustomCode:InvalidFunctionName'})
+            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists' 'Simulink:CustomCode:InvalidFunctionName' 'Simulink:CustomCode:TokenizeError'})
                 rethrow(ME)
             end
         end

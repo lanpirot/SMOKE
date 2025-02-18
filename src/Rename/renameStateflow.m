@@ -1,5 +1,6 @@
-function renameStateflow(sys, varargin)
+function renameStateflow(startSys, varargin)
 % RENAMESTATEFLOW Rename chart blocks and their data to generic names.
+    sys = bdroot(startSys);
 
     sys = get_param(sys, 'handle');
     % If not args are given, run all checks. 
@@ -25,6 +26,10 @@ function renameStateflow(sys, varargin)
 
     for i = 1:length(charts)
         c = charts(i);
+
+        if ~startsWith(c.Path, getfullname(startSys))
+            continue
+        end
 
         % Rename charts
         if sfcharts

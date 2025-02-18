@@ -1,8 +1,7 @@
-function removeModelReferences(sys)
+function removeModelReferences(blocks)
 % REMOVEMODELREFERENCES Remove references to other models.
 
-    sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
+
     for i = 1:length(blocks)
         
         if strcmp(get_param(blocks(i), 'BlockType'), 'ModelReference')

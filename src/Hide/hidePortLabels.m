@@ -1,4 +1,4 @@
-function hidePortLabels(sys, varargin)
+function hidePortLabels(blocks)
 % HIDEPORTLABELS Make port labels of Subsystems visible or hidden.
 %
 %   Inputs:
@@ -10,28 +10,14 @@ function hidePortLabels(sys, varargin)
 %
 %   Side Effects:
 %       Shows or hides the port label.
-
-    sys = get_param(sys, 'handle');
-
-    if nargin > 1
-        hide = varargin{1};
-    else
-        hide = true;
-    end
     
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
     
-    if hide
-        for i = 1:length(blocks)
-            try
-                set_param(blocks(i), 'ShowPortLabels', 'none');
-            catch ME %may cause 'Failed to evaluate mask initialization commands.'
-            end
-            %fprintf('%i %i\n', i, length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on')))
+
+    for i = 1:length(blocks)
+        try
+            set_param(blocks(i), 'ShowPortLabels', 'none');
+        catch ME %may cause 'Failed to evaluate mask initialization commands.'
         end
-    else
-        for i = 1:length(blocks)
-            set_param(blocks(i), 'ShowPortLabels', 'FromPortIcon');
-        end
+        %fprintf('%i %i\n', i, length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on')))
     end
 end

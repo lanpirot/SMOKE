@@ -1,16 +1,13 @@
-function removeLibraryLinks(sys)
+function removeLibraryLinks(blocks)
 % REMOVELIBRARYLINKS Break library links. Links can be used to reference custom
 % blocks or other libraries.
 
-    sys = get_param(sys, 'handle');
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
     simscapestr = 'Simscape';
     lsimscapestr = length(simscapestr);
     for i = 1:length(blocks)
 
         try
             bt = get_param(blocks(i), 'blocktype');
-
             portHandles = get_param(blocks(i), 'porthandles');
             if strcmp(bt(1:min(lsimscapestr, length(bt))), simscapestr) || ~isempty(portHandles.LConn) || ~isempty(portHandles.RConn)
                 % do not interfere with Simscape blocks

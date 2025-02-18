@@ -3,6 +3,7 @@
 %compares model metrics before and after anonymization
 
 
+%test without unlinking library blocks for problematic models
 function test_scalability()
     bdclose('all')
     csvFile = 'results_scalability.csv';
@@ -10,7 +11,7 @@ function test_scalability()
     warning('off', 'all');
     args = {...
         'removemasks',            1, ...
-        'removelibrarylinks',     1, ...
+        'removelibrarylinks',     0, ...
         'removesignalnames',      1, ...
         'removedocblocks',        1, ...
         'removeannotations',      1, ...
@@ -47,7 +48,8 @@ end
 
 function csvData = runLoop(models, csvData, csvFile, args)
     for m = 1:length(models)
-        if csvData(m,:).Success ~= 0
+        rng(m)
+        if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
         end
 
@@ -71,66 +73,57 @@ function csvData = runLoop(models, csvData, csvFile, args)
             cleanup(sys)
 
 
-            blocks_before = metrics_blocks(sys);
+            [blocks_before, signals_before] = compute_metrics(sys);
             loadable = 1;
         catch ME
             loadable = 0;
-            csvData = append_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN, NaN});
+            csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN}, m);
             continue %model is broken
         end
         sys = get_param(sys, 'Name');
         
 
         argsmf = [args 'sysfolder' model.folder];
-
-        if strcmp(get_param(sys, 'Lock'), 'on')
-            time = NaN;
-            locked = 1;
-            success = 0;
-            blocks_after = NaN;
-            saveable = NaN;
-        else
-            tic;
-            addpath C:\work\Obfuscate-Model\src
-            %SMOKE(sys, [], argsmf{:});
-            time = toc;
-            locked = 0;
-            success = 1;
-            try
-                [saveable, sys] = try_save(new_model_path, model, sys);
-                blocks_after = metrics_blocks(sys);
-            catch ME
-                %handle models with broken PreSaveFcn/PostSaveFcns
-                s = get_param(sys, 'handle');
-                blocks = find_system(s, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants');
-                for b = 1:length(blocks)
-                    try
-                        set_param(blocks(b), 'PreSaveFcn', '')
-                        set_param(blocks(b), 'PostSaveFcn', '')
-                    catch ME
-                        
-                    end
+        tic;
+        addpath C:\work\Obfuscate-Model\src
+        SMOKE(sys, [], argsmf{:});
+        time = toc;
+        try
+            sys = try_save(new_model_path, model, sys);
+            [blocks_after, signals_after] = compute_metrics(sys);
+        catch ME
+            %handle models with broken PreSaveFcn/PostSaveFcns
+            s = get_param(sys, 'handle');
+            blocks = find_system(s, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants');
+            for b = 1:length(blocks)
+                try
+                    set_param(blocks(b), 'PreSaveFcn', '')
+                    set_param(blocks(b), 'PostSaveFcn', '')
+                catch ME
+                    
                 end
-                saveable = try_save(new_model_path, model, sys);
-                blocks_after = metrics_blocks(sys);
             end
+            sys = try_save(new_model_path, model, sys);
+            [blocks_after, signals_after] = compute_metrics(sys);
         end
 
-
-        csvData = append_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, success, saveable, time, blocks_before, blocks_after, locked});
+        if signals_before ~= signals_after
+            disp(111111111111111111)
+        end
+        csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_before, blocks_after, signals_before, signals_after}, m);
     end
 end
 
-function metric = metrics_blocks(sys)
-    metric = length(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants'));
+function [blocks, signals] = compute_metrics(sys)
+    blocks = length(find_system(sys, 'LookUnderMasks', 'all', 'Variants', 'AllVariants'));
+    signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line'));
 end
 
-function [saveable, sys] = try_save(new_model_path, model, sys)
+function sys = try_save(new_model_path, model, sys)
     obf_new_model_path = [new_model_path(1:end-4) '_obf' model.name(end-3:end)];
     save_system(sys, obf_new_model_path, 'SaveDirtyReferencedModels', 'on')
     bdclose('all')
     sys = load_system(obf_new_model_path);
-    saveable = 1;
 end
 
 function cleanup(sys)
@@ -144,19 +137,20 @@ function cleanup(sys)
     blocks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants');
     for j=1:length(blocks)
         try
+            set_param(blocks(j), 'Lock', 'off');
+        end
+        try
             set_param(blocks(j), 'Permissions', 'ReadWrite')
-        catch 
         end
     end
     %docblocks would be counted, as well
     delete_block(find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem', 'MaskType', 'DocBlock'))
 end
 
-function new_table = append_to_table(old_table, filename, new_data)
-    new_data = cell2table(new_data, 'VariableNames', {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Blocks_before', 'Blocks_after', 'Locked'});
-    new_table = [old_table; new_data];
+function table = add_to_table(table, filename, new_data, row_number)
+    table(row_number,:) = new_data;
     cd('C:\work\Obfuscate-Model\src\tests')
-    writetable(new_table, filename);
+    writetable(table, filename);
 end
 
 function models = find_models(path)
@@ -166,10 +160,14 @@ end
 function csvData = readCsv(filename)
     if exist(filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
-        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Success', 'Saveable', 'Time', 'Blocks_before', 'Blocks_after', 'Locked'};
+        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Time', 'Blocks_before', 'Blocks_after', 'Signals_before', 'Signals_after'};
         % Convert the header to a table and write it to a CSV file
         writetable(cell2table(header), filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');
+        csvData = readtable(filename);
+        csvData.ModelPath = string(csvData.ModelPath);
+        csvData.NewPath = string(csvData.NewPath);
+        return
     end
 
     csvData = readtable(filename);

@@ -1,8 +1,5 @@
-function renameBlocks(sys)
+function renameBlocks(blks)
 % RENAMEBLOCKS Change the 'Name' parameter to a generic name based on the block type.
-    
-    sys = get_param(sys, 'handle');
-    blks = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Block');
     
     
     

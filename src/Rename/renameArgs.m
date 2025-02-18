@@ -1,9 +1,5 @@
-function renameArgs(sys, parentSys)
+function renameArgs(allArgIns, allArgOuts)
 % RENAMEARGS Give all Simulink Function arguments generic names.
-
-    sys = get_param(sys, 'handle');
-    allArgIns   = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants',  'BlockType', 'ArgIn');
-    allArgOuts  = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ArgOut');           
 
     % Argument Inputs
     for i = 1:length(allArgIns)

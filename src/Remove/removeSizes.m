@@ -1,4 +1,4 @@
-function removeSizes(sys)
+function removeSizes(subsystems)
 % Resets shape and sizes of blocks
 %
 %   Inputs:
@@ -10,10 +10,6 @@ function removeSizes(sys)
 %   Side Effects:
 %       Resets shape and sizes of blocks
 
-    %for all subsystems:
-    sys = get_param(sys, 'handle');
-    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
-    subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 
         blocks = find_system(subsystems(i), 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'SearchDepth', '1', 'type', 'Block');

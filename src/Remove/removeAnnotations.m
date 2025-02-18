@@ -1,8 +1,6 @@
-function removeAnnotations(sys)
+function removeAnnotations(annotations, blocks)
 % REMOVEANNOTATIONS Remove all annotations from the model. 
 % Removes any text, area, or image annotations.
-    sys = get_param(sys, 'handle');
-    annotations = find_system(sys, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'annotation');
     for a = 1:length(annotations)
         try
             delete(annotations(a))
@@ -14,7 +12,6 @@ function removeAnnotations(sys)
     end
 
     % Remove block annotations
-    blocks = Simulink.findBlocks(sys);
     for i = 1:length(blocks)
         if strcmp(get_param(blocks(i), 'AttributesFormatString'),'')
             continue

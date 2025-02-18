@@ -1,17 +1,14 @@
-function removeFunctions(sys)
+function removeFunctions(blocks)
 % Removes MATLAB function Blocks' innards
 
-    sys = get_param(sys, 'handle');
-    block = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'type', 'block');
-    for i = 1:length(block)
+    for i = 1:length(blocks)
         try
-        config = get_param(block(i), "MATLABFunctionConfiguration");
-        config.FunctionScript = '';
+        config = get_param(blocks(i), "MATLABFunctionConfiguration");
+        config.FunctionScript = '0';
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown'})
-                continue
+            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown' 'Simulink:blocks:LockedMATLABFunction' 'Simulink:blocks:LinkedMATLABFunction'})
+                rethrow(ME)
             end
-            config.FunctionScript = '1';
         end
     end
 end

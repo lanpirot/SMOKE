@@ -1,4 +1,4 @@
-function removePositioning(sys)
+function removePositioning(subsystems)
 % Autopositions the whole model
 %
 %   Inputs:
@@ -9,11 +9,6 @@ function removePositioning(sys)
 %
 %   Side Effects:
 %       Autopositions the whole model
-
-    %for all subsystems:
-    sys = get_param(sys, 'handle');
-    subsystems = find_system(sys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
-    subsystems = [subsystems; get_param(sys, 'Handle')];
     for i = 1:length(subsystems)
 
         %first reset all blocks to the origin
@@ -28,7 +23,7 @@ function removePositioning(sys)
 
         %then auto layout the subsystems
         try
-            Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
+            %Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
         catch ME
             if ~ismember(ME.identifier, {'glee_util:messages:GenericError'})
                 rethrow(ME)
