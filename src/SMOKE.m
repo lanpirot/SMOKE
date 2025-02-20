@@ -155,6 +155,11 @@ function SMOKE(sys, parentSys, varargin)
         removeDocBlocks(docBlocks)
         blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'Type', 'Block');
         subsystems = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
+        if sys == obsStartSys
+            subsystemsAndMain = [subsystems; sys];
+        else
+            subsystemsAndMain = subsystems;
+        end
     end
     
     if removecolorannotations
@@ -216,11 +221,11 @@ function SMOKE(sys, parentSys, varargin)
     end
 
     if removesizes
-        removeSizes([subsystems; sys])
+        removeSizes(subsystemsAndMain)
     end
 
     if removepositioning
-        removePositioning([subsystems; sys])
+        removePositioning(subsystemsAndMain)
     end
 
     if renameblocks
