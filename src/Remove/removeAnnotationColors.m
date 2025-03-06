@@ -6,7 +6,7 @@ function removeAnnotationColors(ann)
             set_param(ann(i), 'ForegroundColor', 'black');
             set_param(ann(i), 'BackgroundColor', 'white');
         catch ME %in unlockable Subsystems, these changes are not supported
-            if ~strcmp(ME.identifier, 'Simulink:Libraries:RefViolation')
+            if ~strcmp(ME.identifier, {'Simulink:Libraries:RefViolation', 'MATLAB:hg:udd_interface:CannotDelete'})
                 rethrow(ME)
             end
         end
