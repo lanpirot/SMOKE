@@ -49,6 +49,7 @@ function SMOKE(sys, ~, varargin)
     removefunctions         = getInput('removefunctions', varargin, default);
     removepositioning       = getInput('removepositioning', varargin, default);
     removesizes             = getInput('removesizes', varargin, default);
+    removeSubsytems         = getInput('squashSubsystems', varargin, default);
     
     %   Rename
     renameblocks            = getInput('renameblocks', varargin, default); 
@@ -210,7 +211,11 @@ function SMOKE(sys, ~, varargin)
     end
     
     renameStateflow(obsStartSys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels, recurseSubsystems);
-    
+
+    if removeSubsytems
+        removeSubsystems(subsystems);
+        subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'SubSystem');
+    end    
           
     if hidecontentpreview
         hideContentPreview(subsystems);
