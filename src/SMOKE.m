@@ -98,7 +98,7 @@ function SMOKE(sys, ~, varargin)
     obsStartSys = get_param(obsStartSys, 'Handle');
     sys = get_param(sys, 'Handle');
     blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
-    lines = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
+    lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
     datastores = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreMemory');
     triggers = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'TriggerPort');
     subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
@@ -217,6 +217,10 @@ function SMOKE(sys, ~, varargin)
     renameStateflow(obsStartSys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels, recurseSubsystems);
 
     if removeSubsytems
+        if obsStartSys ~= sys
+            obsStartSys = get_param(get_param(obsStartSys, 'Parent'), 'Handle');
+            open_system(obsStartSys)
+        end
         removeSubsystems(subsystems);
         blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
         subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
