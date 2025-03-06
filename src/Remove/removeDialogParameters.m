@@ -22,7 +22,7 @@ function removeDialogParameters(blocks)
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
-                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts'}) 
+                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks'}) 
                         %these exceptions are mostly to not ruin the
                         %structure of the model, like mux/demux, but also
                         %because they may trigger MATLAB hard crashes
@@ -31,7 +31,7 @@ function removeDialogParameters(blocks)
                     try
                         if isequal(get_param(curr_block, params{p}), get_param(tmp_block, params{p}))
                             %often MATLAB hard crashes, even if the
-                            %parameters are not changed --> skip
+                            %parameters would not be changed, as they are the same before and after --> skip
                             continue
                         end
                     catch ME
@@ -41,7 +41,9 @@ function removeDialogParameters(blocks)
                         end
                     end
                     try
+                        %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
                         set_param(curr_block, params{p}, get_param(tmp_block, params{p}))
+                        %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
                     catch ME
                         %there is too many to catch and handle
                         %if ~ismember(ME.identifier, {'Simulink:Commands:AddBlockInvSrcBlock' 'Simulink:blocks:ConfigSubInvTemplate' 'Simulink:BusElPorts:ParameterNotSupported' 'MATLAB:fieldnames:InvalidInput' 'Simulink:blocks:InvDiscPulseWidth' 'Simulink:Libraries:MissingSourceBlock' 'Simulink:blocks:TriggerPortExists' 'Simulink:Commands:InvSimulinkObjectName' 'Simulink:Commands:SetParamReadOnly' 'Simulink:Parameters:InvParamSetting'})
@@ -52,7 +54,7 @@ function removeDialogParameters(blocks)
             end
             set_param(curr_block, 'MoveFcn', '')
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists' 'Simulink:CustomCode:InvalidFunctionName' 'Simulink:CustomCode:TokenizeError'})
+            if ~ismember(ME.identifier, {'Simulink:blocks:EnablePortExists' 'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists' 'Simulink:CustomCode:InvalidFunctionName' 'Simulink:CustomCode:TokenizeError' 'Simulink:blocks:SubsysErrFcnMsg'})
                 rethrow(ME)
             end
         end

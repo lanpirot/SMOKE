@@ -10,7 +10,7 @@ function removeMasks(blocks)
             %set_param(blocks(i), mask_params{m}, '');
         catch ME
             %if ~ismember(ME.identifier, {'Simulink:SampleTime:InvTsParamSetting_No_Continuous' 'SimulinkBlock:Foundation:BadSetParamValue' 'Simulink:Masking:CannotMaskReferenceBlock' 'Simulink:Commands:InvSimulinkObjectName' 'Simulink:Masking:CannotMaskInportShadowBlock' 'Simulink:Masking:InvalidParameterSettingWithPrompt' 'Simulink:Masking:Bad_Init_Commands' 'Simulink:blocks:SystemBlockInvalidModification' 'Simulink:Libraries:RefViolation'})
-            if ~ismember(ME.identifier, {'Simulink:Masking:Methods_Invalid_InputTypes' 'Simulink:Masking:CannotExecuteMethodOnLinkBlk' 'Simulink:blocks:SystemBlockInvalidModification'})
+            if ~ismember(ME.identifier, {'Simulink:Masking:Methods_Invalid_InputTypes' 'Simulink:Masking:CannotExecuteMethodOnLinkBlk' 'Simulink:blocks:SystemBlockInvalidModification' 'Simulink:blocks:SubsysErrFcnMsg'})
                 rethrow(ME)
             end
         end

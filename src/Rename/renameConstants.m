@@ -17,7 +17,7 @@ function renameConstants(blocks)
                 set_param(blocks(i), 'Value', '1');
             end
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:Promote_Parameter_InvalidSet'})
+            if ~ismember(ME.identifier, {'Simulink:Commands:Promote_Parameter_InvalidSet' 'Simulink:SampleTime:InvTsParamSetting_Vector'})
                 rethrow(ME)
             end
         end

@@ -1,4 +1,4 @@
-function SMOKE(sys, parentSys, varargin)
+function SMOKE(sys, ~, varargin)
 % OBFUSCATEMODEL Obfuscate a Simulink model such that application-specific or
 % company-specific details are removed.
 %

@@ -24,7 +24,7 @@ function test_scalability()
         'removefunctions',        1, ...
         'removepositioning',      1, ...
         'removesizes',            1, ...
-        'renameblocks',           1, ...
+        'renameblocks',           0, ...
         'renameconstants',        1, ...
         'renamegotofromtag',      1, ...
         'renamedatastorename',    1, ...
@@ -40,19 +40,21 @@ function test_scalability()
         'sffunctions',            1, ...
         'sflabels',               1, ...
         'removemodelreferences',  0, ...
-        'recursemodels',          1};
+        'recursemodels',          1, ...
+        'completeModel',          1};
     models = find_models("C:\work\data\SLNET");
     runLoop(models, csvData, csvFile, args);
 end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for m = 1:length(models)
+    for m = 3051:length(models)
         rng(m)
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
         end
 
+        loadable = 0;
         bdclose('all')
         model = models(m);
         fprintf("%i %s\n", m, model.name)
@@ -73,10 +75,12 @@ function csvData = runLoop(models, csvData, csvFile, args)
             cleanup(sys)
 
 
+            save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
+            bdclose('all')
+            sys = load_system(new_model_path);
             [blocks_before, signals_before] = compute_metrics(sys);
             loadable = 1;
         catch ME
-            loadable = 0;
             csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN}, m);
             continue %model is broken
         end
