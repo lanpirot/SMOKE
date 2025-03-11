@@ -43,12 +43,13 @@ function test_scalability()
         'recursemodels',          1, ...
         'completeModel',          1};
     models = find_models("C:\work\data\SLNET");
+    %models = find_models("/home/matlab/SLNET");
     runLoop(models, csvData, csvFile, args);
 end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
-    for m = 3051:length(models)
+    for m = 1:length(models)
         rng(m)
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
@@ -63,6 +64,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         try
             model_path = [model.folder filesep model.name];
             new_model_path = ['C:\tmp\obfmodels\o' num2str(m) model.name(end-3:end)];
+            %new_model_path = ['/home/matlab/SMOKE/src/tests/tmp/o' num2str(m) model.name(end-3:end)]
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
 
@@ -89,7 +91,8 @@ function csvData = runLoop(models, csvData, csvFile, args)
 
         argsmf = [args 'sysfolder' model.folder];
         tic;
-        addpath C:\work\Obfuscate-Model\src
+        addpath(genpath("C:\work\Obfuscate-Model\src"))
+        %addpath(genpath(".."))
         SMOKE(sys, [], argsmf{:});
         time = toc;
         try
@@ -154,6 +157,7 @@ end
 function table = add_to_table(table, filename, new_data, row_number)
     table(row_number,:) = new_data;
     cd('C:\work\Obfuscate-Model\src\tests')
+    %cd('/home/matlab/SMOKE/src/tests')
     writetable(table, filename);
 end
 
@@ -175,4 +179,6 @@ function csvData = readCsv(filename)
     end
 
     csvData = readtable(filename);
+    csvData.ModelPath = string(csvData.ModelPath);
+    csvData.NewPath = string(csvData.NewPath);
 end
