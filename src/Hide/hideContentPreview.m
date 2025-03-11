@@ -1,4 +1,4 @@
-function hideContentPreview(blocks)
+function hideContentPreview(subs)
 % HIDECONTENTPREVIEW Make the content preview of Subsystems visible or hidden.
 %
 %   Inputs:
@@ -12,10 +12,13 @@ function hideContentPreview(blocks)
 %       Shows or hides the content preview.
     
 
-    for i = 1:length(blocks)
+    for i = 1:length(subs)
         try
-            set(blocks(i), 'ContentPreviewEnabled', 'Off'); 
+            set_param(subs{i}, 'ContentPreviewEnabled', 'Off'); 
         catch ME %trying to suppress popup errors of Mask Initialization failures
+            if ~ismember(ME.identifier, {'Simulink:Masking:Bad_Init_Commands'})
+                rethrow(ME)
+            end
         end
     end
 end

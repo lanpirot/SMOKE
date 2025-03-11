@@ -1,6 +1,8 @@
 function removeImplementation(sys)
 % REMOVEIMPLEMENTATION Clear system of implementation blocks. Keep interface
 % blocks.
+%currently this function is not called. It would not work as is: the
+%surrounding SubSystems of the "interface" will get deleted, as well.
 
     % Remove lines
     allLines = find_system(sys, 'Searchdepth', 1, 'FollowLinks', 'on', 'LookUnderMasks', 'All', 'FindAll', 'on', 'Type', 'line');

@@ -58,6 +58,7 @@ function SMOKE(sys, ~, varargin)
     renamedatastorename     = getInput('renamedatastorename', varargin, default);
     renamearguments         = getInput('renamearguments', varargin, default);
     renamefunctions         = getInput('renamefunctions', varargin, default);
+    renameStflow            = getInput('renameStateFlow', varargin, default);
     
     %   Hide
     hidecontentpreview      = getInput('hidecontentpreview', varargin, default);
@@ -95,13 +96,14 @@ function SMOKE(sys, ~, varargin)
     else
         sd = 1;
     end
+    obsStartSysName = obsStartSys;
     obsStartSys = get_param(obsStartSys, 'Handle');
     sys = get_param(sys, 'Handle');
     blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
     lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
     datastores = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreMemory');
     triggers = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'TriggerPort');
-    subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+    subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
     annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
     docBlocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem', 'MaskType', 'DocBlock');
     inports = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block', 'BlockType', 'Inport');
@@ -113,11 +115,6 @@ function SMOKE(sys, ~, varargin)
     writes = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreWrite');
     reads  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreRead');
     bla = [blocks; lines; annotations];
-    if sys == obsStartSys
-        subsystemsAndMain = [subsystems; sys];
-    else
-        subsystemsAndMain = subsystems;
-    end
 
 
     %% unlock model
@@ -158,13 +155,8 @@ function SMOKE(sys, ~, varargin)
     if removedocblocks
         removeDocBlocks(docBlocks)
         blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
-        subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
         annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
-        if sys == obsStartSys
-            subsystemsAndMain = [subsystems; sys];
-        else
-            subsystemsAndMain = subsystems;
-        end
     end
     
     if removecolorannotations
@@ -193,6 +185,38 @@ function SMOKE(sys, ~, varargin)
     
     removeCustomDataTypes(inports)  % will probably affect functionality
 
+    if removeSubsytems
+        if obsStartSys ~= sys
+            obsStartSys = get_param(get_param(obsStartSys, 'Parent'), 'Handle');
+            open_system(obsStartSys)
+        end
+        removeSubsystems(subsystems);
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
+        subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        if removeannotations
+            annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
+            removeAnnotations(annotations, blocks)
+        end
+    end    
+          
+    if hidecontentpreview
+        hideContentPreview(subsystems);
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
+    end
+    
+    if hideportlabels
+        hidePortLabels(subsystems);
+    end
+
+    if removesizes
+        removeSizes(blocks)
+    end
+
+    if removepositioning
+        removePositioning(blocks)
+    end
+
+
     % Rename    
     if renameconstants
         renameConstants(constants)
@@ -214,41 +238,8 @@ function SMOKE(sys, ~, varargin)
         renameSimFcns(triggers);
     end
     
-    renameStateflow(obsStartSys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels, recurseSubsystems);
-
-    if removeSubsytems
-        if obsStartSys ~= sys
-            obsStartSys = get_param(get_param(obsStartSys, 'Parent'), 'Handle');
-            open_system(obsStartSys)
-        end
-        removeSubsystems(subsystems);
-        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
-        subsystems = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
-        if sys == obsStartSys
-            subsystemsAndMain = [subsystems; sys];
-        else
-            subsystemsAndMain = subsystems;
-        end
-        if removeannotations
-            annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
-            removeAnnotations(annotations, blocks)
-        end
-    end    
-          
-    if hidecontentpreview
-        hideContentPreview(subsystems);
-    end
-    
-    if hideportlabels
-        hidePortLabels(subsystems);
-    end
-
-    if removesizes
-        removeSizes(subsystemsAndMain)
-    end
-
-    if removepositioning
-        removePositioning(subsystemsAndMain)
+    if renameStflow
+        renameStateflow(obsStartSys, 'sfcharts', sfcharts, 'sfports', sfports, 'sfevents', sfevents, 'sfstates', sfstates, 'sfboxes', sfboxes, 'sffunctions', sffunctions, 'sflabels', sflabels, recurseSubsystems);
     end
 
     if renameblocks

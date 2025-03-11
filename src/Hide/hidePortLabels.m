@@ -1,4 +1,4 @@
-function hidePortLabels(blocks)
+function hidePortLabels(subs)
 % HIDEPORTLABELS Make port labels of Subsystems visible or hidden.
 %
 %   Inputs:
@@ -13,10 +13,13 @@ function hidePortLabels(blocks)
     
     
 
-    for i = 1:length(blocks)
+    for i = 1:length(subs)
         try
-            set_param(blocks(i), 'ShowPortLabels', 'none');
+            set_param(subs{i}, 'ShowPortLabels', 'none');
         catch ME %may cause 'Failed to evaluate mask initialization commands.'
+            if ~ismember(ME.identifier, {'Simulink:Libraries:CannotChangeLinkedBlkParam'})
+                rethrow(ME)
+            end
         end
     end
 end
