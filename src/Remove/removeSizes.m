@@ -29,7 +29,7 @@ function removeSizes(subsystems)
                 curr_block_pos(4) = curr_block_pos(2) + height;
                 set_param(curr_block, 'Position', curr_block_pos)
             catch ME
-                if ~ismember(ME.identifier, {'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:EnablePortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Libraries:RefModificationViolation' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists'})
+                if ~ismember(ME.identifier, {'Simulink:blocks:TriggerPortExists' 'Simulink:blocks:EnablePortExists' 'Simulink:blocks:ActionPortExists' 'Simulink:blocks:IteratorBlockExists' 'Simulink:Commands:AddBlockBuiltinInportShadow' 'Simulink:StateConfigurator:DuplicateConfiguratorBlocks' 'Simulink:Libraries:RefModificationViolation' 'Simulink:blocks:EventListenerCannotBeAddedToSSHavingEventListenerBlock' 'Simulink:blocks:DataPortNotAllowedForCompositionSubDomain' 'Simulink:blocks:ResetPortExists' 'Simulink:blocks:SubsysErrFcnMsg'})
                     rethrow(ME)
                 end
             end

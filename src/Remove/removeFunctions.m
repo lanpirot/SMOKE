@@ -6,7 +6,7 @@ function removeFunctions(blocks)
         config = get_param(blocks(i), "MATLABFunctionConfiguration");
         config.FunctionScript = '0';
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown' 'Simulink:blocks:LockedMATLABFunction' 'Simulink:blocks:LinkedMATLABFunction'})
+            if ~ismember(ME.identifier, {'Simulink:Commands:ParamUnknown' 'Simulink:blocks:LockedMATLABFunction' 'Simulink:blocks:LinkedMATLABFunction' 'Simulink:blocks:SubsysErrFcnMsg'})
                 rethrow(ME)
             end
         end

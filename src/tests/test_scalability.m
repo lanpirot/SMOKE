@@ -64,7 +64,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         try
             model_path = [model.folder filesep model.name];
             new_model_path = ['C:\tmp\obfmodels\o' num2str(m) model.name(end-3:end)];
-            %new_model_path = ['/home/matlab/SMOKE/src/tests/tmp/o' num2str(m) model.name(end-3:end)]
+            %new_model_path = ['/home/matlab/SMOKE/src/tests/tmp/o' num2str(m) model.name(end-3:end)];
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
 
@@ -91,7 +91,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
 
         argsmf = [args 'sysfolder' model.folder];
         tic;
-        addpath(genpath("C:\work\Obfuscate-Model\src"))
+        %addpath(genpath("C:\work\Obfuscate-Model\src"))
         %addpath(genpath(".."))
         SMOKE(sys, [], argsmf{:});
         time = toc;
