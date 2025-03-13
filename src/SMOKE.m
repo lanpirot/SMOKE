@@ -1,4 +1,4 @@
-function SMOKE(sys, ~, varargin)
+function SMOKE(sys, varargin)
 % OBFUSCATEMODEL Obfuscate a Simulink model such that application-specific or
 % company-specific details are removed.
 %
@@ -24,10 +24,6 @@ function SMOKE(sys, ~, varargin)
         default = 1;
     else
         default = 0;
-    end
-    
-    if ~exist('parentSys', 'var')
-        parentSys = [];
     end
     
     %% Manage parameters
@@ -100,25 +96,28 @@ function SMOKE(sys, ~, varargin)
     obsStartSys = get_param(obsStartSys, 'Handle');
     sys = get_param(sys, 'Handle');
     blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
-    lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
+    %lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
+    annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
     datastores = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreMemory');
     triggers = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'TriggerPort');
     subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
-    annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
     docBlocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem', 'MaskType', 'DocBlock');
     inports = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block', 'BlockType', 'Inport');
     gotos = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'Goto');
-    constants = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'Constant');
+    %constants = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'Constant');
     allArgIns   = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants,  'BlockType', 'ArgIn');
     allArgOuts  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'ArgOut');   
     froms = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'From');
     writes = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreWrite');
     reads  = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'DataStoreRead');
-    bla = [blocks; lines; annotations];
+    
 
 
     %% unlock model
     unlockModel(obsStartSys, blocks)
+    blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
+    lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
+    bla = [blocks; lines; annotations];
 
     
     %% Recurse Model References
@@ -219,6 +218,7 @@ function SMOKE(sys, ~, varargin)
 
     % Rename    
     if renameconstants
+        constants = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'Constant');
         renameConstants(constants)
     end
     

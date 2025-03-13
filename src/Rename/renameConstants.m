@@ -3,9 +3,10 @@ function renameConstants(blocks)
 % RENAMECONSTANTS Give all constants generic values and name.
     
     for i = 1:length(blocks)
-        val = get_param(blocks(i), 'Value');
-        isNaN = isnan(str2double(val));
         try
+            val = get_param(blocks(i), 'Value');
+            isNaN = isnan(str2double(val));
+        
             set_param(blocks(i), 'Name', ['Constant' num2str(blocks(i))]);
             if ~isNaN
                 set_param(blocks(i), 'Value', '-17');

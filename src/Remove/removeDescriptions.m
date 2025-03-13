@@ -9,7 +9,7 @@ function removeDescriptions(bla)
             set_param(bla(i), 'BlockDescription', '');
         catch ME
             if ~ismember(ME.identifier, {'Simulink:Commands:SetParamReadOnly' 'Simulink:Commands:ParamUnknown' 'Simulink:Libraries:RefModificationViolation' 'Simulink:Libraries:RefViolation' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem' 'Simulink:BusElPorts:CannotChangeAttributesBusObject' 'Simulink:blocks:SubsysErrFcnMsg'})
-                corethrow(ME)
+                rethrow(ME)
             end
         end
     end

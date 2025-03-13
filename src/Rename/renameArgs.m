@@ -1,6 +1,7 @@
 function renameArgs(allArgIns, allArgOuts)
 % RENAMEARGS Give all Simulink Function arguments generic names.
 
+    parentSys = gcs;
     % Argument Inputs
     for i = 1:length(allArgIns)
         changed = false;

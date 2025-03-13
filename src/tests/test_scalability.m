@@ -92,9 +92,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
 
         argsmf = [args 'sysfolder' model.folder];
         tic;
-        %addpath(genpath("C:\work\Obfuscate-Model\src"))
-        %addpath(genpath(".."))
-        SMOKE(sys, [], argsmf{:});
+        SMOKE(sys, argsmf{:});
         time = toc;
         try
             sys = try_save(new_model_path, model, sys);

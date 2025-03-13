@@ -1,6 +1,7 @@
 function renameSimFcns(triggers)
 % RENAMESIMFCNS Rename Simulink Functions to generic names, and update callers.
     % Triggers
+    parentSys = gcs;
     global fcnNum;
     if isempty(fcnNum)
         fcnNum = 1;

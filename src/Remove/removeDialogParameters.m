@@ -32,11 +32,12 @@ function removeDialogParameters(blocks)
                         if isequal(get_param(curr_block, params{p}), get_param(tmp_block, params{p}))
                             %often MATLAB hard crashes, even if the
                             %parameters would not be changed, as they are the same before and after --> skip
+                            %if started without display, some DialogParameters are completely broken, also
                             continue
                         end
                     catch ME
 
-                        if ~ismember(ME.identifier, {'Simulink:Libraries:FailedToLoadLibraryForBlock' 'Simulink:DataType:DataTypeObjectNotInScope'})
+                        if ~ismember(ME.identifier, {'Simulink:Libraries:FailedToLoadLibraryForBlock' 'Simulink:DataType:DataTypeObjectNotInScope' 'MATLAB:class:InvalidHandle'})
                             rethrow(ME)
                         end
                     end
