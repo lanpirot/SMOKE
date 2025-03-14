@@ -16,7 +16,7 @@ function hideContentPreview(subs)
         try
             set_param(subs{i}, 'ContentPreviewEnabled', 'Off'); 
         catch ME %trying to suppress popup errors of Mask Initialization failures
-            if ~ismember(ME.identifier, {'Simulink:Masking:Bad_Init_Commands'})
+            if ~ismember(ME.identifier, {'Simulink:Masking:Bad_Init_Commands' 'Simulink:Libraries:FailedToLoadLibraryForBlock'})
                 rethrow(ME)
             end
         end

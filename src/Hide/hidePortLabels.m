@@ -17,7 +17,7 @@ function hidePortLabels(subs)
         try
             set_param(subs{i}, 'ShowPortLabels', 'none');
         catch ME %may cause 'Failed to evaluate mask initialization commands.'
-            if ~ismember(ME.identifier, {'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Masking:Bad_Init_Commands'})
+            if ~ismember(ME.identifier, {'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Masking:Bad_Init_Commands' 'Simulink:Libraries:FailedToLoadLibraryForBlock'})
                 rethrow(ME)
             end
         end
