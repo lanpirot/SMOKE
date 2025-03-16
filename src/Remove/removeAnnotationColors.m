@@ -3,7 +3,6 @@ function removeAnnotationColors(ann)
 
     for i = 1:length(ann)
         try
-            return
             set_param(ann(i), 'ForegroundColor', 'black');
             set_param(ann(i), 'BackgroundColor', 'white');
         catch ME %in unlockable Subsystems, these changes are not supported

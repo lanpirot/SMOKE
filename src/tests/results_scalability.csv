@@ -1,10 +1,4 @@
 ID,ModelPath,NewPath,Loadable,Time,Blocks_before,Blocks_after,Signals_before,Signals_after
-1,C:\work\data\SLNET\SLNET_GitHub\100042416\DISCON_Simulink-master\Simulink_64bit\DISCON_Empty.slx,C:\tmp\obfmodels\o1.slx,1,0.2498451,67,67,0,0
-2,C:\work\data\SLNET\SLNET_GitHub\100042416\DISCON_Simulink-master\Simulink_64bit\DISCON_NREL5MW.slx,C:\tmp\obfmodels\o2.slx,1,0.9100094,207,207,150,150
-3,C:\work\data\SLNET\SLNET_GitHub\100381142\Omega6_Simulink_Integration-master\OmegaTest.slx,C:\tmp\obfmodels\o3.slx,1,2.6620809,20,20,28,28
-4,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\StateFlow\MicrowaveCex.slx,C:\tmp\obfmodels\o4.slx,1,0.2960553,32,32,34,34
-5,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\contract\DaysEnum.slx,C:\tmp\obfmodels\o5.slx,1,0.6883677,29,29,31,31
-6,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\contract\DaysEnumInvalid.slx,C:\tmp\obfmodels\o6.slx,1,0.7210193,28,28,30,30
-7,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\contract\DoorLock.slx,C:\tmp\obfmodels\o7.slx,1,3.4300742,295,295,393,393
-8,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\contract\DoorLockCompositional.slx,C:\tmp\obfmodels\o8.slx,1,4.2675808,272,272,347,347
-9,C:\work\data\SLNET\SLNET_GitHub\100999374\cocoSim2-master\examples\contract\DoorLockCompositionalHtml.slx,C:\tmp\obfmodels\o9.slx,1,4.3241153,272,272,347,347
+1,C:\work\data\SLNET\SLNET_GitHub\100042416\DISCON_Simulink-master\Simulink_64bit\DISCON_Empty.slx,C:\tmp\obfmodels\o1.slx,1,0.6909241,67,67,0,0
+2,C:\work\data\SLNET\SLNET_GitHub\100042416\DISCON_Simulink-master\Simulink_64bit\DISCON_NREL5MW.slx,C:\tmp\obfmodels\o2.slx,1,2.1482062,207,207,150,150
+3,C:\work\data\SLNET\SLNET_GitHub\100381142\Omega6_Simulink_Integration-master\OmegaTest.slx,C:\tmp\obfmodels\o3.slx,1,2.3721886,20,20,28,28

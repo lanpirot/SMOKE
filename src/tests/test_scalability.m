@@ -81,7 +81,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
             bdclose('all')
             sys = load_system(new_model_path);
-            [blocks_before, signals_before] = compute_metrics(sys);
+            [blocks_before, signals_before] = compute_metrics(sys, new_model_path);
             loadable = 1;
         catch ME
             csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN}, m);
@@ -96,7 +96,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         time = toc;
         try
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys);
+            [blocks_after, signals_after] = compute_metrics(sys, new_model_path);
         catch ME
             %handle models with broken PreSaveFcn/PostSaveFcns
             s = get_param(sys, 'handle');
@@ -110,19 +110,68 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 end
             end
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys);
-        end
-
-        if signals_before ~= signals_after
-            disp(111111111111111111)
+            [blocks_after, signals_after] = compute_metrics(sys, new_model_path);
         end
         csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_before, blocks_after, signals_before, signals_after}, m);
     end
 end
 
-function [blocks, signals] = compute_metrics(sys)
-    blocks = length(find_system(sys, 'LookUnderMasks', 'all', 'Variants', 'AllVariants'));
-    signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line'));
+function [blocks, signals] = compute_metrics(sys, model_path)
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
+    blocktypes = length(unique(get_param(blocks(2:end), 'BlockType')));
+    blocks = length(blocks);
+    signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line'));
+    subsystems = length(find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem'));
+
+    %complexity
+    info = Simulink.MDLInfo(model_path);
+    SLversion = info.SimulinkVersion;
+    date = get_param(sys, 'LastModifiedDate');
+    
+    solver = get_param(sys, 'Solver');
+    [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys);
+end
+
+
+function [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys)
+    inits = {0, NaN, NaN, NaN, NaN, NaN, NaN};
+    [compilable, at0, at1, at2, at4, at8, at10] = inits{:};
+
+    model_name = get_param(sys, 'name');
+    cd 'C:\work\Obfuscate-Model\src\tests\tmp'
+    try
+        open_system(sys)
+        eval([model_name, '([],[],[],''compile'');']);
+        compilable = 1;
+        try
+            while 1
+                eval([model_name, '([],[],[],''term'');']);
+            end
+        catch
+        end
+        [at0, at1, at2, at4, at8, at10] = get_output(sys);
+    catch ME
+    end
+    cd '..'
+end
+
+function [at0, at1, at2, at4, at8, at10] = get_output(sys)
+    inits = {NaN, NaN, NaN, NaN, NaN, NaN};
+    [at0, at1, at2, at4, at8, at10] = inits{:};
+    
+    %for outermost inputs
+    %feed with inputs of everchanging value of correct input type
+    %rounded to type(inputNumber * sine(x + inputNumber))
+
+    %find_signal_to_watch
+    %with increasing depth look for outputs, take first
+    %otherwise take any signal, that does not source itself from an input
+    %otherwise NaN
+
+
+    set_param(sys, "SimulationCommand","start", "SimulationCommand","pause")
+    set_param(sys, "SimulationCommand","continue", "SimulationCommand","pause")
+    set_param(sys, SimulationCommand="stop")
 end
 
 function sys = try_save(new_model_path, model, sys)
