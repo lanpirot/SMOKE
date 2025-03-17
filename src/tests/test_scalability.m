@@ -51,7 +51,7 @@ end
 
 function csvData = runLoop(models, csvData, csvFile, args)
     for m = 1:length(models)
-        rng(m)
+        rng(m, 'twister')
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
         end
@@ -129,7 +129,7 @@ function [blocks, signals] = compute_metrics(sys, model_path)
     date = get_param(sys, 'LastModifiedDate');
     
     solver = get_param(sys, 'Solver');
-    [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys);
+    %[compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys);
 end
 
 
@@ -139,6 +139,7 @@ function [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys)
 
     model_name = get_param(sys, 'name');
     cd 'C:\work\Obfuscate-Model\src\tests\tmp'
+    %cd '/home/matlab/SMOKE/src/tests/tmp/'
     try
         open_system(sys)
         eval([model_name, '([],[],[],''compile'');']);
