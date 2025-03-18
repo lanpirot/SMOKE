@@ -22,8 +22,8 @@ function test_scalability()
         'removecolorannotations', 1, ...
         'removedialogparameters', 1, ...
         'removefunctions',        1, ...
-        'removepositioning',      1, ...
-        'removesizes',            1, ...
+        'removepositioning',      0, ...
+        'removesizes',            0, ...
         'renameblocks',           1, ...
         'renameconstants',        1, ...
         'renamegotofromtag',      1, ...
@@ -52,9 +52,11 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
+    metric_engine = slmetric.Engine();
+
     %for ii = 1:length(models)
     %    m = round(1.5^(ii-1));
-    for m = 1:length(models)
+    for m = 17:length(models)
         rng(m, 'twister')
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
@@ -85,7 +87,9 @@ function csvData = runLoop(models, csvData, csvFile, args)
             save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
             bdclose('all')
             sys = load_system(new_model_path);
-            [blocks_before, signals_before] = compute_metrics(sys, new_model_path);
+            [blocks_before, signals_before] = compute_metrics(sys, new_model_path, metric_engine);
+            bdclose('all')
+            sys = load_system(new_model_path);
             loadable = 1;
         catch ME
             csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN}, m);
@@ -100,7 +104,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         time = toc;
         try
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys, new_model_path);
+            [blocks_after, signals_after] = compute_metrics(sys, new_model_path, metric_engine);
         catch ME
             %handle models with broken PreSaveFcn/PostSaveFcns
             s = get_param(sys, 'handle');
@@ -114,38 +118,45 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 end
             end
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys, new_model_path);
+            [blocks_after, signals_after] = compute_metrics(sys, new_model_path, metric_engine);
         end
         csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_before, blocks_after, signals_before, signals_after}, m);
     end
 end
 
-function [blocks, signals] = compute_metrics(sys, model_path)
+function [blocks, signals] = compute_metrics(sys, model_path, metric_engine)
     blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
     blocktypes = length(unique(get_param(blocks(2:end), 'BlockType')));
     blocks = length(blocks);
     signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line'));
     subsystems = length(find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem'));
 
-    %complexity
+    setAnalysisRoot(metric_engine, 'Root', get_param(sys, 'Name'))
+    execute(metric_engine, 'mathworks.metrics.CyclomaticComplexity');
+    res_col = getMetrics(metric_engine, 'mathworks.metrics.CyclomaticComplexity');
+    if res_col.Status == 0
+        cyclo = res_col.Results(1).AggregatedValue;
+    else
+        cyclo = -1;
+    end
+
     info = Simulink.MDLInfo(model_path);
     SLversion = info.SimulinkVersion;
     date = get_param(sys, 'LastModifiedDate');
     
     solver = get_param(sys, 'Solver');
-    %[compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys);
+    [compilable, output_data] = compile_and_run(sys);
 end
 
 
-function [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys)
-    inits = {0, NaN, NaN, NaN, NaN, NaN, NaN};
-    [compilable, at0, at1, at2, at4, at8, at10] = inits{:};
+function [compilable, output_data] = compile_and_run(sys)
+    inits = {0, NaN};
+    [compilable, output_data] = inits{:};
 
     model_name = get_param(sys, 'name');
     cd 'C:\work\Obfuscate-Model\src\tests\tmp'
     %cd '/home/matlab/SMOKE/src/tests/tmp/'
     try
-        open_system(sys)
         eval([model_name, '([],[],[],''compile'');']);
         compilable = 1;
         try
@@ -154,29 +165,82 @@ function [compilable, at0, at1, at2, at4, at8, at10] = compile_and_run(sys)
             end
         catch
         end
-        [at0, at1, at2, at4, at8, at10] = get_output(sys);
+        output_data = get_output(sys);
     catch ME
+        disp(1)
     end
     cd '..'
 end
 
-function [at0, at1, at2, at4, at8, at10] = get_output(sys)
-    inits = {NaN, NaN, NaN, NaN, NaN, NaN};
-    [at0, at1, at2, at4, at8, at10] = inits{:};
+function output_data = get_output(sys)
     
-    %for outermost inputs
-    %feed with inputs of everchanging value of correct input type
-    %rounded to type(inputNumber * sine(x + inputNumber))
-
-    %find_signal_to_watch
-    %with increasing depth look for outputs, take first
-    %otherwise take any signal, that does not source itself from an input
-    %otherwise NaN
+    try
+        find_and_connect_inputs(sys)
 
 
-    set_param(sys, "SimulationCommand","start", "SimulationCommand","pause")
-    set_param(sys, "SimulationCommand","continue", "SimulationCommand","pause")
-    set_param(sys, SimulationCommand="stop")
+        outputwatch = [get_param(sys, 'Name') '_watcher'];
+        outputs = find_and_connect_outputs(sys, outputwatch);
+        
+
+        set_param(sys, 'StopTime', '10')
+        set_param(sys, "SimulationCommand", "start")
+        output_data = {};
+        pause(1)
+        for o = 1:outputs
+            next_eval = evalin('base', [outputwatch num2str(o)]);
+            output_data{end+1} = next_eval.Data(:);
+        end
+    catch ME    
+        output_data = NaN;
+        disp(1)
+    end
+end
+
+function find_and_connect_inputs(sys)
+    srcBlocks = find_system(sys, 'SearchDepth', 1, 'BlockType', 'Inport');
+    for sb = 1:length(srcBlocks)
+        srcBlock = srcBlocks(sb);
+        srcLineHandles = get_param(srcBlock, 'LineHandles');
+        destBlocks = get_param(srcLineHandles.Outport, 'DstPortHandle');
+        dataType = get_param(srcBlock, 'OutDataTypeStr');
+
+        generatorBlock = add_block('simulink/Sources/Sine Wave', [get_param(srcBlock, 'Parent') '/' 'MyGenerator' num2str(sb)]);
+        set_param(generatorBlock, 'Amplitude', num2str(sb));
+        set_param(generatorBlock, 'Frequency', num2str(sb));
+        set_param(generatorBlock, 'Phase', num2str(sb));
+        generatorPortHandles = get_param(generatorBlock, 'PortHandles');
+        if strcmp(dataType, 'boolean')
+            generatorBlock2 = add_block('simulink/Signal Attributes/Data Type Conversion', [get_param(srcBlock, 'Parent') '/' 'MyCaster' num2str(sb)]);
+            set_param(generatorBlock2, 'OutDataTypeStr', 'boolean')
+            add_line(get_param(generatorBlock, 'Parent'), generatorPortHandles.Outport, get_param(generatorBlock2, 'PortHandles').Inport)
+            generatorPortHandles = get_param(generatorBlock2, 'PortHandles');
+        end
+        
+
+        lines = get_param(srcBlock, 'LineHandles');
+        delete_line(lines.Outport)
+        delete_block(srcBlock)
+        for db = 1:length(destBlocks)
+            add_line(get_param(generatorBlock, 'Parent'), generatorPortHandles.Outport, destBlocks(db))
+        end
+    end
+end
+
+function outputs = find_and_connect_outputs(sys, outputwatch)
+    destBlocks = find_system(sys, 'SearchDepth', 1, 'BlockType', 'Outport');
+    for db = 1:length(destBlocks)
+        destBlock = destBlocks(db);
+        destLineHandles = get_param(destBlock, 'LineHandles');    
+        srcPort = get_param(destLineHandles.Inport, 'SrcPortHandle');
+        
+        workspaceBlock = add_block('simulink/Sinks/To Workspace', [get_param(destBlock, 'Parent') '/' outputwatch num2str(db)]);
+        set_param(workspaceBlock, 'VariableName', [outputwatch num2str(db)])
+        workSpacePortHandles = get_param(workspaceBlock, 'PortHandles');
+    
+        
+        add_line(get_param(destBlock, 'Parent'), srcPort, workSpacePortHandles.Inport);
+    end
+    outputs = length(destBlocks);
 end
 
 function sys = try_save(new_model_path, model, sys)

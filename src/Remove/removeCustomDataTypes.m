@@ -10,7 +10,7 @@ function removeCustomDataTypes(inports)
                 set_param(inports(i), 'OutDataTypeStr', 'Inherit: auto');
             end
         catch ME
-            if ~ismember(ME.identifier, {})
+            if ~ismember(ME.identifier, {'Simulink:BusElPorts:CannotChangeAttributesBusObject'})
                 rethrow(ME)
             end
         end
