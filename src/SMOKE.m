@@ -38,6 +38,7 @@ function SMOKE(sys, varargin)
     removedescriptions      = getInput('removedescriptions', varargin, default);
     removeblockcallbacks    = getInput('removeblockcallbacks', varargin, default);
     removemodelinformation  = getInput('removemodelinformation', varargin, default);
+    customdatatypes         = getInput('customdatatypes', varargin, default);
     
     removecolorblocks       = getInput('removecolorblocks', varargin, default);
     removecolorannotations  = getInput('removecolorannotations', varargin, default);
@@ -190,9 +191,10 @@ function SMOKE(sys, varargin)
         removeFunctions(blocks)
     end
     
-
-    inports = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block', 'BlockType', 'Inport');
-    removeCustomDataTypes(inports)  % will probably affect functionality 
+    if customdatatypes
+        inports = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block', 'BlockType', 'Inport');
+        removeCustomDataTypes(inports)  % will probably affect functionality 
+    end
           
     if hidecontentpreview
         hideContentPreview(subsystems);
