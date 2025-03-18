@@ -52,6 +52,8 @@ end
 
 
 function csvData = runLoop(models, csvData, csvFile, args)
+    %for ii = 1:length(models)
+    %    m = round(1.5^(ii-1));
     for m = 1:length(models)
         rng(m, 'twister')
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
