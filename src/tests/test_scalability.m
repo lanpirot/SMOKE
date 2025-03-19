@@ -1,12 +1,16 @@
 %runs script over a bunch of models
-%tests error-free-ness and runtime
 %compares model metrics before and after anonymization
 
 
-%test without unlinking library blocks for problematic models
 function test_scalability()
+    SLNET_PATH = "C:\work\data\SLNET";
+    %SLNET_PATH = "/home/matlab/SLNET";
+    TMP_MODEL_SAVE_PATH = 'C:\tmp\obfmodels';
+    %TMP_MODEL_SAVE_PATH = "/home/matlab/SMOKE/src/tests/tmp";
+
+
     bdclose('all')
-    csvFile = 'results_scalability.csv';
+    csvFile = [TMP_MODEL_SAVE_PATH filesep 'results_scalability.csv'];
     csvData = readCsv(csvFile);
     warning('off', 'all');
     args = {...
@@ -44,14 +48,14 @@ function test_scalability()
         'recursemodels',          1, ...
         'customdatatypes',        1, ...
         'completeModel',          1};
-    models = find_models("C:\work\data\SLNET");
-    %models = find_models("/home/matlab/SLNET");
-    runLoop(models, csvData, csvFile, args);
+
+    models = find_models(SLNET_PATH);
+    runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args);
     disp('All models completely obfuscated.')
 end
 
 
-function csvData = runLoop(models, csvData, csvFile, args)
+function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
     metric_engine = slmetric.Engine();
 
     %for ii = 1:length(models)
@@ -70,8 +74,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         
         try
             model_path = [model.folder filesep model.name];
-            new_model_path = ['C:\tmp\obfmodels\o' num2str(m) model.name(end-3:end)];
-            %new_model_path = ['/home/matlab/SMOKE/src/tests/tmp/o' num2str(m) model.name(end-3:end)];
+            new_model_path = [TMP_MODEL_SAVE_PATH filesep 'o' num2str(m) model.name(end-3:end)];
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
             date = get_param(sys, 'LastModifiedDate');
@@ -88,7 +91,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
             bdclose('all')
             sys = load_system(new_model_path);
-            [blocks_bf, blocktypes_bf, signals_bf, subsystems_bf, cyclo_bf, SLversion_bf, date_bf, solver_bf, compilable_bf, output_data_bf] = compute_metrics(sys, new_model_path, metric_engine, date);
+            [blocks_bf, blocktypes_bf, signals_bf, subsystems_bf, cyclo_bf, SLversion_bf, date_bf, solver_bf, compilable_bf, output_data_bf] = compute_metrics(sys, new_model_path, metric_engine, date, TMP_MODEL_SAVE_PATH);
             bdclose('all')
             sys = load_system(new_model_path);
             loadable = 1;
@@ -105,7 +108,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         time = toc;
         try
             sys = try_save(new_model_path, model, sys);
-            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'));
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'), TMP_MODEL_SAVE_PATH);
         catch ME
             %handle models with broken PreSaveFcn/PostSaveFcns
             s = get_param(sys, 'handle');
@@ -119,7 +122,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 end
             end
             sys = try_save(new_model_path, model, sys);
-            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'));
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'), TMP_MODEL_SAVE_PATH);
         end
         output_same = isequal(output_data_bf, output_data_af);
         if output_same
@@ -135,7 +138,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
     end
 end
 
-function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solver, compilable, output_data] = compute_metrics(sys, model_path, metric_engine, date)
+function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solver, compilable, output_data] = compute_metrics(sys, model_path, metric_engine, date, TMP_MODEL_SAVE_PATH)
     blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
     blocktypes = length(unique(get_param(blocks(2:end), 'BlockType')));
     blocks = length(blocks);
@@ -155,17 +158,16 @@ function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solve
     SLversion = info.SimulinkVersion;
     
     solver = get_param(sys, 'Solver');
-    [compilable, output_data] = compile_and_run(sys);
+    [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH);
 end
 
 
-function [compilable, output_data] = compile_and_run(sys)
+function [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH)
     inits = {0, NaN};
     [compilable, output_data] = inits{:};
 
     model_name = get_param(sys, 'name');
-    cd 'C:\work\Obfuscate-Model\src\tests\tmp'
-    %cd '/home/matlab/SMOKE/src/tests/tmp/'
+    cd(TMP_MODEL_SAVE_PATH)
     try
         eval([model_name, '([],[],[],''compile'');']);
         compilable = 1;
@@ -178,7 +180,6 @@ function [compilable, output_data] = compile_and_run(sys)
         output_data = get_output(sys);
     catch ME
     end
-    cd '..'
 end
 
 function output_data = get_output(sys)
@@ -281,8 +282,6 @@ end
 
 function table = add_to_table(table, filename, new_data, row_number)
     table(row_number,:) = new_data;
-    cd('C:\work\Obfuscate-Model\src\tests')
-    %cd('/home/matlab/SMOKE/src/tests')
     writetable(table, filename);
 end
 
