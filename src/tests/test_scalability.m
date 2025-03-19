@@ -56,7 +56,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
 
     %for ii = 1:length(models)
     %    m = round(1.5^(ii-1));
-    for m = 17:length(models)
+    for m = 1:length(models)
         rng(m, 'twister')
         if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
             continue
@@ -74,6 +74,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             %new_model_path = ['/home/matlab/SMOKE/src/tests/tmp/o' num2str(m) model.name(end-3:end)];
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
+            date = get_param(sys, 'LastModifiedDate');
 
             %clean up model for taking accurate measurements:
             %delete DocBlocks
@@ -87,7 +88,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
             save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
             bdclose('all')
             sys = load_system(new_model_path);
-            [blocks_before, signals_before] = compute_metrics(sys, new_model_path, metric_engine);
+            [blocks_bf, blocktypes_bf, signals_bf, subsystems_bf, cyclo_bf, SLversion_bf, date_bf, solver_bf, compilable_bf, output_data_bf] = compute_metrics(sys, new_model_path, metric_engine, date);
             bdclose('all')
             sys = load_system(new_model_path);
             loadable = 1;
@@ -104,7 +105,7 @@ function csvData = runLoop(models, csvData, csvFile, args)
         time = toc;
         try
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys, new_model_path, metric_engine);
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'));
         catch ME
             %handle models with broken PreSaveFcn/PostSaveFcns
             s = get_param(sys, 'handle');
@@ -118,13 +119,26 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 end
             end
             sys = try_save(new_model_path, model, sys);
-            [blocks_after, signals_after] = compute_metrics(sys, new_model_path, metric_engine);
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, new_model_path, metric_engine, datetime('now'));
         end
-        csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_before, blocks_after, signals_before, signals_after}, m);
+        output_same = isequal(output_data_bf, output_data_af);
+        if output_same
+            output_same = 0;
+            for i = 1:length(output_data_bf)
+                if any(output_data_bf{i} ~= 0)
+                    output_same = 1;
+                    break
+                end
+            end
+        end
+        if output_same
+            disp(1)
+        end
+        csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_bf, blocks_af, blocktypes_bf, blocktypes_af, signals_bf, signals_af, subsystems_bf, subsystems_af, cyclo_bf, cyclo_af, SLversion_bf, SLversion_af, date_bf, date_af, solver_bf, solver_af, compilable_bf, compilable_af, output_same}, m);
     end
 end
 
-function [blocks, signals] = compute_metrics(sys, model_path, metric_engine)
+function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solver, compilable, output_data] = compute_metrics(sys, model_path, metric_engine, date)
     blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
     blocktypes = length(unique(get_param(blocks(2:end), 'BlockType')));
     blocks = length(blocks);
@@ -142,7 +156,6 @@ function [blocks, signals] = compute_metrics(sys, model_path, metric_engine)
 
     info = Simulink.MDLInfo(model_path);
     SLversion = info.SimulinkVersion;
-    date = get_param(sys, 'LastModifiedDate');
     
     solver = get_param(sys, 'Solver');
     [compilable, output_data] = compile_and_run(sys);
@@ -167,7 +180,6 @@ function [compilable, output_data] = compile_and_run(sys)
         end
         output_data = get_output(sys);
     catch ME
-        disp(1)
     end
     cd '..'
 end
@@ -192,7 +204,6 @@ function output_data = get_output(sys)
         end
     catch ME    
         output_data = NaN;
-        disp(1)
     end
 end
 
@@ -285,17 +296,22 @@ end
 function csvData = readCsv(filename)
     if exist(filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
-        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Time', 'Blocks_before', 'Blocks_after', 'Signals_before', 'Signals_after'};
+        header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Time', 'Blocks_before', 'Blocks_after', 'Types_before', 'Types_after', 'Signals_before', 'Signals_after', 'Subs_before', 'Subs_after', 'cyclo_before', 'cyclo_after', 'SLversion_before', 'SLversion_after', 'date_before', 'date_after', 'solver_before', 'solver_after', 'compilable_before', 'compilable_after', 'same_output'};
         % Convert the header to a table and write it to a CSV file
         writetable(cell2table(header), filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');
         csvData = readtable(filename);
-        csvData.ModelPath = string(csvData.ModelPath);
-        csvData.NewPath = string(csvData.NewPath);
-        return
+    else
+         csvData = readtable(filename);
     end
 
-    csvData = readtable(filename);
+   
     csvData.ModelPath = string(csvData.ModelPath);
     csvData.NewPath = string(csvData.NewPath);
+    csvData.SLversion_before = string(csvData.SLversion_before);
+    csvData.SLversion_after = string(csvData.SLversion_after);
+    csvData.date_before = string(csvData.date_before);
+    csvData.date_after = string(csvData.date_after);
+    csvData.solver_before = string(csvData.solver_before);
+    csvData.solver_after = string(csvData.solver_after);
 end
