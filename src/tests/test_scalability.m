@@ -131,9 +131,6 @@ function csvData = runLoop(models, csvData, csvFile, args)
                 end
             end
         end
-        if output_same
-            disp(1)
-        end
         csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_bf, blocks_af, blocktypes_bf, blocktypes_af, signals_bf, signals_af, subsystems_bf, subsystems_af, cyclo_bf, cyclo_af, SLversion_bf, SLversion_af, date_bf, date_af, solver_bf, solver_af, compilable_bf, compilable_af, output_same}, m);
     end
 end
