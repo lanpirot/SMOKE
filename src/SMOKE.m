@@ -74,9 +74,6 @@ function SMOKE(sys, varargin)
     % Recursion
     recursemodels           = getInput('recursemodels', varargin, default);
 
-    % Context
-    sysfolder               = getInput('sysfolder', varargin, 'No Path given');
-
     %Location
     completeModel           = getInput('completeModel', varargin, default);
     if completeModel
