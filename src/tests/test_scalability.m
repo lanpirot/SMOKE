@@ -63,7 +63,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
             sys = load_system(new_model_path);
             loadable = 1;
         catch ME
-            csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, '', '', '', '', '', '', NaN, NaN, NaN}, m);
+            csvData = add_to_table(csvData, csvFile, {m, model_path, '', loadable, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, '', '', '', '', '', '', NaN, NaN, NaN, '', ''}, m);
             continue %model is broken
         end
         sys = get_param(sys, 'Name');
@@ -117,7 +117,7 @@ function [output_same, output_type_bf, output_type_af] = handle_outputs(ob, oa)
     elseif isequal(output_type_bf, output_type_af) && isequal(lb, la)
         output_same = 1;
     else
-        disp(1)
+        error('Unexpected output types')
     end
 end
 
@@ -156,7 +156,7 @@ function [o_type, l] = output_type(o)
         o_type = no;
         l = 1;
     else
-        disp(1)
+        error('Unexpected output')
     end
 end
 
@@ -198,6 +198,7 @@ function [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH)
         end
         output_data = get_output(sys);
     catch ME
+        1 == 1;
     end
 end
 
