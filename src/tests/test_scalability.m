@@ -7,35 +7,38 @@ function test_scalability()
     %SLNET_PATH = '/home/matlab/SLNET';
     TMP_MODEL_SAVE_PATH = 'C:\tmp\obfmodels';
     %TMP_MODEL_SAVE_PATH = '/home/matlab/SMOKE/src/tests/tmp';
-
-
-    bdclose('all')
     csvFile = [TMP_MODEL_SAVE_PATH filesep 'results_scalability.csv'];
-    csvData = readCsv(csvFile);
-    warning('off', 'all');
-    args = get_args();
 
+    csvData = readCsv(TMP_MODEL_SAVE_PATH, csvFile);
     models = find_models(SLNET_PATH);
-    runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args);
+    runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, get_args());
     disp('All models completely obfuscated.')
 end
 
 
 function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
+    warning('off', 'all');
     metric_engine = slmetric.Engine();
 
     %for ii = 1:length(models)
     %    m = round(1.1^(ii-1));
-    for m = 1:length(models)
+    for m = 5129:length(models)
         rng(m, 'twister')
-        if height(csvData) >= m && csvData(m,:).Blocks_before == csvData(m,:).Blocks_after && csvData(m,:).Signals_before == csvData(m,:).Signals_after
-            continue
+        if height(csvData) >= m
+            model_row = csvData(m,:);
+            if model_row.Blocks_before == model_row.Blocks_after && model_row.Signals_before == model_row.Signals_after && model_row.Types_before == model_row.Types_after && model_row.Subs_before == model_row.Subs_after
+                continue
+            end
         end
 
         loadable = 0;
         bdclose('all')
         model = models(m);
+
         fprintf("%i %s\n", m, model.name)
+        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx'})
+            continue
+        end
         
         try
             model_path = [model.folder filesep model.name];
@@ -198,7 +201,6 @@ function [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH)
         end
         output_data = get_output(sys);
     catch ME
-        1 == 1;
     end
 end
 
@@ -309,16 +311,20 @@ function models = find_models(path)
     models = vertcat(vertcat(dir(fullfile(path, strcat('**',filesep,'*.slx')))), vertcat(dir(fullfile(path, strcat('**',filesep,'*.mdl')))));
 end
 
-function csvData = readCsv(filename)
-    if exist(filename, 'file') ~= 2
+function csvData = readCsv(TMP_MODEL_SAVE_PATH, csv_filename)
+    if exist(TMP_MODEL_SAVE_PATH, 'dir') ~= 7
+        mkdir(TMP_MODEL_SAVE_PATH)
+    end
+
+    if exist(csv_filename, 'file') ~= 2
         % File does not exist, create a new one with the expected schema
         header = {'ID', 'ModelPath', 'NewPath', 'Loadable', 'Time', 'Blocks_before', 'Blocks_after', 'Types_before', 'Types_after', 'Signals_before', 'Signals_after', 'Subs_before', 'Subs_after', 'cyclo_before', 'cyclo_after', 'SLversion_before', 'SLversion_after', 'date_before', 'date_after', 'solver_before', 'solver_after', 'compilable_before', 'compilable_after', 'same_output', 'OutputType_before', 'OutputType_after'};
         % Convert the header to a table and write it to a CSV file
-        writetable(cell2table(header), filename, 'WriteVariableNames', false);
+        writetable(cell2table(header), csv_filename, 'WriteVariableNames', false);
         disp('CSV-File did not exist. Created a new file with the expected schema.');
-        csvData = readtable(filename);
+        csvData = readtable(csv_filename);
     else
-         csvData = readtable(filename);
+         csvData = readtable(csv_filename);
     end
 
    
@@ -353,7 +359,7 @@ function args = get_args()
         'removefunctions',        1, ...
         'removepositioning',      1, ...
         'removesizes',            1, ...
-        'renameblocks',           1, ...
+        'renameblocks',           0, ...
         'renameconstants',        1, ...
         'renamegotofromtag',      1, ...
         'renamedatastorename',    1, ...
