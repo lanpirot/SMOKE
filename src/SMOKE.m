@@ -47,6 +47,7 @@ function SMOKE(sys, varargin)
     removepositioning       = getInput('removepositioning', varargin, default);
     removesizes             = getInput('removesizes', varargin, default);
     removeSubsytems         = getInput('squashSubsystems', varargin, default);
+    removeImplement         = getInput('removeImplement', varargin, 0);
     
     %   Rename
     renameblocks            = getInput('renameblocks', varargin, default); 
@@ -104,7 +105,6 @@ function SMOKE(sys, varargin)
     blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
     lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
     annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
-    bla = [blocks; lines; annotations];
 
     
     %% Recurse Model References
@@ -130,6 +130,14 @@ function SMOKE(sys, varargin)
         removeModelReferences(blocks)
     end
 
+    if removeImplement
+        removeImplementation(obsStartSys)
+        subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
+        lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
+        annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
+    end
+
     if removesignalnames
         removeSignalNames(lines, blocks)
     end
@@ -137,8 +145,7 @@ function SMOKE(sys, varargin)
     if removedescriptions
         blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
         lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
-        bla = [blocks; lines; annotations];
-        removeDescriptions(bla)
+        removeDescriptions([blocks; lines; annotations])
     end
     
     if removedocblocks

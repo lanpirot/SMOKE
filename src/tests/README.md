@@ -21,7 +21,6 @@ To run the replication, run the MATLAB script `test_scalability.m` in `src/tests
 
 
 ## General Remarks
-
 While executing, expect a number of compilation or simulation notes, figures, warnings, and errors be reported. 
 Errors result either from of misconfigured models (that were misconfigured from the start) or because our obfuscation or input/output harnessing broke parts of the model. 
 Furthermore, some models' analysis triggers callbacks within in the model, where they output some information onto the cmd line.
@@ -35,5 +34,4 @@ Note: some models' simulation (e.g., 3560 SINGLE_PWM.slx) may expect user input 
 We tested and ran all scripts on a laptop with: Windows 11 Pro, MATLAB R2024b (with graphics display activated), Intel i9-13980HX, 96GB RAM.
 
 # Improvements
-
 Please contact us, if you miss a feature in our tool or experience difficulties or crashes.

@@ -10,7 +10,6 @@ function removeDialogParameters(blocks)
 %   Side Effects:
 %       Resets all Dialog Parameters of all blocks.
 
-    sys = bdroot(blocks(1));
     for i = 1:length(blocks)
         warning('off', 'all');
         try
