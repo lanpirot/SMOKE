@@ -10,6 +10,7 @@ function removeDialogParameters(blocks)
 %   Side Effects:
 %       Resets all Dialog Parameters of all blocks.
 
+    sys = bdroot(blocks(1));
     for i = 1:length(blocks)
         warning('off', 'all');
         try
@@ -22,7 +23,7 @@ function removeDialogParameters(blocks)
                 params = fields(get_param(tmp_block, 'DialogParameters'));
                 
                 for p = 1:length(params)
-                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks', 'InitialConditionSource'}) 
+                    if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks', 'InitialConditionSource', 'Permissions'}) 
                         %these exceptions are mostly to not ruin the
                         %structure of the model, like mux/demux, but also
                         %because they may trigger MATLAB hard crashes
@@ -43,10 +44,16 @@ function removeDialogParameters(blocks)
                     end
                     try
                         %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
-                        set_param(curr_block, params{p}, get_param(tmp_block, params{p}))
+                        set_to = get_param(tmp_block, params{p});
+                        if strcmp(params{p}, 'InitialCondition') || strcmp(params{p}, 'Gain')
+                            set_to = '17';
+                        end
+                        set_param(curr_block, params{p}, set_to)
                         %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
                     catch ME
                         %there is too many to catch and handle
+                        %just ignore model breaking dialog parameter
+                        %changes
                         %if ~ismember(ME.identifier, {'Simulink:Commands:AddBlockInvSrcBlock' 'Simulink:blocks:ConfigSubInvTemplate' 'Simulink:BusElPorts:ParameterNotSupported' 'MATLAB:fieldnames:InvalidInput' 'Simulink:blocks:InvDiscPulseWidth' 'Simulink:Libraries:MissingSourceBlock' 'Simulink:blocks:TriggerPortExists' 'Simulink:Commands:InvSimulinkObjectName' 'Simulink:Commands:SetParamReadOnly' 'Simulink:Parameters:InvParamSetting'})
                         %    rethrow(ME)
                         %end

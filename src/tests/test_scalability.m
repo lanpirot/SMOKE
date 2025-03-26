@@ -20,9 +20,13 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
     warning('off', 'all');
     metric_engine = slmetric.Engine();
 
-    %for ii = 1:length(models)
-    %    m = round(1.1^(ii-1));
-    for m = 5129:length(models)
+    for ii = 1:length(models)
+        m = round(1.1^(ii-1));
+    %for m = 1:length(models)
+        if m > length(models)
+            break
+        end
+
         rng(m, 'twister')
         if height(csvData) >= m
             model_row = csvData(m,:);
@@ -36,13 +40,15 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         model = models(m);
 
         fprintf("%i %s\n", m, model.name)
-        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx'})
+        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl'})
             continue
         end
-        
+
+
         try
             model_path = [model.folder filesep model.name];
             new_model_path = [TMP_MODEL_SAVE_PATH filesep 'o' num2str(m) model.name(end-3:end)];
+            
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
             date = get_param(sys, 'LastModifiedDate');
@@ -179,7 +185,11 @@ function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solve
         cyclo = -1;
     end
     
-    solver = get_param(sys, 'Solver');
+    try
+        solver = get_param(sys, 'Solver');
+    catch
+        solver = 'unknown';
+    end
     [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH);
 end
 
