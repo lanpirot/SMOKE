@@ -6,7 +6,7 @@ Remove all sensitive IP from models with SMOKE!
 
 <img src="imgs/Cover.png" width="850">
 
-*__Disclaimer__: The authors of this tool make no guarantees that all proprietary/confidential information is indeed removed from the Simulink model file. Users should inspect the model to verify that no proprietary/confidential remains.*
+*__Disclaimer__: The authors of this tool make no guarantees that all proprietary/confidential information is indeed removed from the Simulink model file. Users should inspect the model to verify that no proprietary/confidential information remains.*
 
 ## User Guide
 

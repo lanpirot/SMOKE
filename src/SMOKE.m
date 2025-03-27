@@ -192,6 +192,7 @@ function SMOKE(sys, varargin)
     end
 
     if removefunctions
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
         removeFunctions(blocks)
     end
     

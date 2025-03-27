@@ -14,6 +14,34 @@ function removeDialogParameters(blocks)
         warning('off', 'all');
         try
             curr_block = blocks(i);
+
+            try
+                params = fields(get_param(curr_block, 'DialogParameters'));
+                for p = 1:length(params)
+                    try
+                        if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks', 'InitialConditionSource', 'Permissions'}) 
+                            %these exceptions are mostly to not ruin the
+                            %structure of the model, like mux/demux, but also
+                            %because they may trigger MATLAB hard crashes
+                            continue
+                        end
+                        old_param = get_param(curr_block, params{p});
+                        if isnumeric(old_param)
+                            set_param(curr_block, params{p}, -17);
+                        elseif ischar(old_param)
+                            set_param(curr_block, params{p}, '');
+                        end
+                    catch ME
+                    end
+                end
+
+            catch ME
+            end
+
+
+
+
+
             curr_parent = get_param(curr_block, 'Parent');
             tmp_block_path = [curr_parent '/' 'tmpblock'];
             tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);

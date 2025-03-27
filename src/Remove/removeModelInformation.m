@@ -13,4 +13,8 @@ function removeModelInformation(sys)
     set_param(sys, 'ModifiedComment', '');
     set_param(sys, 'ModifiedHistory', '');
     set_param(sys, 'ModelVersionFormat', '1.0'); % Changes ModelVersion also, but only after saving
+    try
+        set_param(sys, 'ExtraOptions', '');
+    catch ME
+    end
 end

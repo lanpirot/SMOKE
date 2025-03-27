@@ -20,9 +20,9 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
     warning('off', 'all');
     metric_engine = slmetric.Engine();
 
-    for ii = 1:length(models)
-        m = round(1.1^(ii-1));
-    %for m = 1:length(models)
+    %for ii = 1:length(models)
+    %    m = round(1.1^(ii-1));
+    for m = 1:length(models)
         if m > length(models)
             break
         end
@@ -40,7 +40,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         model = models(m);
 
         fprintf("%i %s\n", m, model.name)
-        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl'})
+        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl' 'psoMPPT1500.slx'})
             continue
         end
 

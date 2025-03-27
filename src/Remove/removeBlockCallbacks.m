@@ -4,13 +4,13 @@ function removeBlockCallbacks(blocks)
 %
 % See: https://www.mathworks.com/help/simulink/ug/block-callbacks.html
 
-    callbacks = {'CopyFcn' 'DeleteFcn' 'LoadFcn' 'ModelCloseFcn' 'PreSaveFcn' 'PostSaveFcn' 'InitFcn' 'StartFcn' 'PauseFcn' 'ContinueFcn' 'StopFcn' 'NameChangeFcn' 'ClipboardFcn' 'DestroyFcn' 'PreCopyFcn' 'OpenFcn' 'CloseFcn' 'PreDeleteFcn' 'ParentCloseFcn' 'MoveFcn' 'PreSaveFcn'};
+    callbacks = {'CopyFcn' 'DeleteFcn' 'LoadFcn' 'ModelCloseFcn' 'PreSaveFcn' 'PostSaveFcn' 'InitFcn' 'StartFcn' 'PauseFcn' 'ContinueFcn' 'StopFcn' 'NameChangeFcn' 'ClipboardFcn' 'DestroyFcn' 'PreCopyFcn' 'OpenFcn' 'CloseFcn' 'PreDeleteFcn' 'ParentCloseFcn' 'MoveFcn' 'PreSaveFcn' 'PreLoadFcn'};
     for i = 1:length(blocks)
         for c = 1:length(callbacks)
             try
                 set_param(blocks(i), callbacks{c}, '');
             catch ME
-                if ~ismember(ME.identifier, {'Simulink:Commands:SetParamInvalidArgumentType' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem' 'Simulink:blocks:SubsysErrFcnMsgInvCB' 'Simulink:blocks:SubsysErrFcnMsg'})
+                if ~ismember(ME.identifier, {'Simulink:Commands:SetParamInvalidArgumentType' 'Simulink:Libraries:CannotChangeLinkedBlkParam' 'Simulink:Commands:InvSimulinkObjHandle' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem' 'Simulink:blocks:SubsysErrFcnMsgInvCB' 'Simulink:blocks:SubsysErrFcnMsg' 'Simulink:Commands:ParamUnknown'})
                     rethrow(ME)
                 end
             end
