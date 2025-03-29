@@ -1,4 +1,4 @@
-function removePositioning(blocks)
+function removePositioning(blocks, subsystems)
 % Autopositions the whole model
 %
 %   Inputs:
@@ -14,17 +14,24 @@ function removePositioning(blocks)
         width = pos(3) - pos(1);
         height = pos(4) - pos(2);
         pos = [0 0 width height];
-        set_param(blocks(j), 'Position', pos)
+        try
+            set_param(blocks(j), 'Position', pos)
+        catch ME
+            if ~ismember(ME.identifier, {'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem'})
+                rethrow(ME)
+            end
+        end
     end
 
-    %then auto layout the subsystems
-    try
-        %Simulink.BlockDiagram.arrangeSystem(subsystems(i), FullLayout='true')
-    catch ME
-        if ~ismember(ME.identifier, {'glee_util:messages:GenericError'})
-            rethrow(ME)
+    for j = 1:length(subsystems)
+        try
+            Simulink.BlockDiagram.arrangeSystem(subsystems(j), FullLayout='true')
+        catch ME
+            if ~ismember(ME.identifier, {'glee_util:messages:GenericError'})
+                rethrow(ME)
+            end
+            %some Subsystems, like the compare to constant block pretend to
+            %be a Subsystem, while no changes within are possible.
         end
-        %some Subsystems, like the compare to constant block pretend to
-        %be a Subsystem, while no changes within are possible.
-    end
+    end    
 end

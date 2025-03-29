@@ -117,6 +117,14 @@ function SMOKE(sys, varargin)
     if removelibrarylinks
         removeLibraryLinks(blocks)
     end
+    
+    if removedocblocks
+        docBlocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem', 'MaskType', 'DocBlock');
+        removeDocBlocks(docBlocks)
+        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
+        subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
+    end
 
     if removemasks
         removeMasks(blocks)
@@ -147,14 +155,6 @@ function SMOKE(sys, varargin)
         lines = find_system(obsStartSys, 'FindAll', 'on', 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line');
         removeDescriptions([blocks; lines; annotations])
     end
-    
-    if removedocblocks
-        docBlocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem', 'MaskType', 'DocBlock');
-        removeDocBlocks(docBlocks)
-        blocks = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Block');
-        subsystems = find_system(obsStartSysName, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
-        annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
-    end
 
     if removeSubsytems
         if obsStartSys ~= sys
@@ -169,7 +169,7 @@ function SMOKE(sys, varargin)
             removeAnnotations(annotations, blocks)
             annotations = find_system(obsStartSys, 'SearchDepth', sd, 'LookUnderMasks', 'all', 'FindAll', 'on', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Annotation');
         end
-    end   
+    end
     
     if removecolorannotations
         removeAnnotationColors(annotations)
@@ -215,7 +215,8 @@ function SMOKE(sys, varargin)
     end
 
     if removepositioning
-        removePositioning(blocks)
+        subs = find_system(obsStartSys, 'SearchDepth', sd-1, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem');
+        removePositioning(blocks, [subs; obsStartSys])
     end
 
 

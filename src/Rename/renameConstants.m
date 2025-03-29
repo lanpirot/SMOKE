@@ -24,7 +24,7 @@ function renameConstants(blocks)
                 disp(1)
             end
         catch ME
-            if ~ismember(ME.identifier, {'Simulink:Commands:Promote_Parameter_InvalidSet' 'Simulink:SampleTime:InvTsParamSetting_Vector' 'Simulink:Parameters:InvParamSetting'})
+            if ~ismember(ME.identifier, {'Simulink:Commands:Promote_Parameter_InvalidSet' 'Simulink:SampleTime:InvTsParamSetting_Vector' 'Simulink:Parameters:InvParamSetting' 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem'})
                 rethrow(ME)
             end
         end

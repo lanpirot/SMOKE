@@ -19,18 +19,21 @@ function removeDialogParameters(blocks)
                 params = fields(get_param(curr_block, 'DialogParameters'));
                 for p = 1:length(params)
                     try
-                        if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks', 'InitialConditionSource', 'Permissions'}) 
+                        if ismember(params{p}, {'Inputs', 'Outputs', 'VariantControl', 'VariantControlMode', 'LabelModeActiveChoice', 'NumPorts', 'FrameSettings', 'Port', 'NumInputPorts', 'NumOutputPorts', 'BlockChoice', 'ShowPortLabels', 'MemberBlocks', 'InitialConditionSource', 'Permissions', 'Parameters'}) 
                             %these exceptions are mostly to not ruin the
                             %structure of the model, like mux/demux, but also
                             %because they may trigger MATLAB hard crashes
                             continue
                         end
                         old_param = get_param(curr_block, params{p});
+                        %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
+                        %fprintf('%s %s\n', get_param(curr_block, "BlockType"), params{p})
                         if isnumeric(old_param)
                             set_param(curr_block, params{p}, -17);
                         elseif ischar(old_param)
                             set_param(curr_block, params{p}, '');
                         end
+                        %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
                     catch ME
                     end
                 end
@@ -44,7 +47,11 @@ function removeDialogParameters(blocks)
 
             curr_parent = get_param(curr_block, 'Parent');
             tmp_block_path = [curr_parent '/' 'tmpblock'];
-            tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);
+            try
+                tmp_block = add_block(['built-in/', get_param(curr_block, 'BlockType')], tmp_block_path);
+            catch ME
+                continue
+            end
             
             if ~isempty(get_param(tmp_block, 'DialogParameters'))
                 params = fields(get_param(tmp_block, 'DialogParameters'));
@@ -75,6 +82,7 @@ function removeDialogParameters(blocks)
                         if strcmp(params{p}, 'InitialCondition') || strcmp(params{p}, 'Gain')
                             set_to = '17';
                         end
+                        %fprintf('%s %s %s\n', get_param(curr_block, "BlockType"), params{p}, string(set_to))
                         set_param(curr_block, params{p}, set_to)
                         %fprintf("%i %i %i %s\n", length(find_system(bdroot(blocks(i)), 'FindAll', 'on', 'LookUnderMasks', 'all', 'Variants', 'AllVariants', 'Type', 'Line')), i, p, params{p})
                     catch ME
@@ -103,4 +111,5 @@ function removeDialogParameters(blocks)
             end
         end
     end
+    %disp("Dialog Parameters done")
 end
