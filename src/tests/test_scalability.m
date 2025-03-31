@@ -22,7 +22,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
 
     %for ii = 1:length(models)
     %    m = round(1.1^(ii-1));
-    for m = 1:10000
+    for m = 4343:10000
         if m > length(models)
             break
         end
@@ -30,7 +30,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         rng(m, 'twister')
         if height(csvData) >= m
             model_row = csvData(m,:);
-            if model_row.Blocks_before == model_row.Blocks_after && model_row.Signals_before == model_row.Signals_after && model_row.Types_before == model_row.Types_after && model_row.Subs_before == model_row.Subs_after
+            if model_row.Blocks_before == model_row.Blocks_after && model_row.Signals_before == model_row.Signals_after && model_row.Types_before == model_row.Types_after && model_row.Subs_before == model_row.Subs_after && ~strcmp(model_row.OutputType_before,'')
                 continue
             end
         end
@@ -351,8 +351,8 @@ end
 
 function args = get_args()
     %OPTION 1
-    %sanitize and obfuscate all but links/referenced models -- this would
-    %break the metrics (e.g. additional Subsystems appear, etc.), and is thus ignored
+    %sanitize and obfuscate all but those options that would
+    %break the metrics (e.g. additional Subsystems appear, etc.), and are thus ignored
     args = {...
         'removemasks',            1, ...
         'removelibrarylinks',     0, ... %changes the count of model elements, even though, technically the model structure is not changed
@@ -368,7 +368,7 @@ function args = get_args()
         'removefunctions',        1, ...
         'removepositioning',      0, ... %in a few models, a few Lines get removed by this, as the model design gets a bit optimized
         'removesizes',            1, ...
-        'renameblocks',           1, ...
+        'renameblocks',           0, ...%in a few models Subsystem links break on renaming blocks and then the Subsystem's inner elements also get lost
         'renameconstants',        1, ...
         'renamegotofromtag',      1, ...
         'renamedatastorename',    1, ...
