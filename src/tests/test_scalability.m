@@ -22,7 +22,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
 
     %for ii = 1:length(models)
     %    m = round(1.1^(ii-1));
-    for m = 4342:length(models)
+    for m = 1:10000
         if m > length(models)
             break
         end
@@ -40,10 +40,10 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         model = models(m);
 
         fprintf("%i %s\n", m, model.name)
-        if ismember(model.name, {'Space_vector_modul_concept.slx' 'UPFC.slx' 'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl' 'psoMPPT1500.slx' 'HPW.slx' 'simulation3Phase.slx' 'power_wind_dfig_det_gridfrequency.slx'})
+        %bad models, that crash MATLAB without Exception raise
+        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl'})
             continue
         end
-
 
         try
             model_path = [model.folder filesep model.name];
@@ -366,9 +366,9 @@ function args = get_args()
         'removecolorannotations', 1, ...
         'removedialogparameters', 1, ...
         'removefunctions',        1, ...
-        'removepositioning',      0, ... %sometimes Lines get removed by this, as the model design gets optimized
+        'removepositioning',      0, ... %in a few models, a few Lines get removed by this, as the model design gets a bit optimized
         'removesizes',            1, ...
-        'renameblocks',           0, ...
+        'renameblocks',           1, ...
         'renameconstants',        1, ...
         'renamegotofromtag',      1, ...
         'renamedatastorename',    1, ...

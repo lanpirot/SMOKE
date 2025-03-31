@@ -40,6 +40,9 @@ function renameBlocks(blks)
                 set_param(blks(j), 'ShowName', 'off');
                 break
             catch ME
+                if strcmp(ME.identifier, 'Simulink:Libraries:SetParamDeniedForBlockInsideReadOnlySubsystem')
+                    break
+                end
                 %try again, until an unblocked name is found
             end
         end
