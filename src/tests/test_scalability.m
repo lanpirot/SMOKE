@@ -22,7 +22,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
 
     %for ii = 1:length(models)
     %    m = round(1.1^(ii-1));
-    for m = 5353:10000
+    for m = 1:10000
         if m > length(models)
             break
         end
@@ -30,7 +30,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         rng(m, 'twister')
         if height(csvData) >= m
             model_row = csvData(m,:);
-            if model_row.Blocks_before == model_row.Blocks_after && model_row.Signals_before == model_row.Signals_after && model_row.Types_before == model_row.Types_after && model_row.Subs_before == model_row.Subs_after && ~strcmp(model_row.OutputType_before,'')
+            if ~model_row.Loadable || model_row.Blocks_before == model_row.Blocks_after && model_row.Signals_before == model_row.Signals_after && model_row.Types_before == model_row.Types_after && model_row.Subs_before == model_row.Subs_after && ~strcmp(model_row.OutputType_before,'')
                 continue
             end
         end
@@ -41,7 +41,10 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
 
         fprintf("%i %s\n", m, model.name)
         %bad models, that crash MATLAB without Exception raise
-        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx' 'xtrlmod.mdl'})
+        if ismember(model.name, {'host_receive.slx' 'Landing_Gear.slx' 'Landing_Gear_IP_Protect_START.slx' 'Landing_Gear_LS.slx' 'Landing_Gear_RSIM.slx'})
+            %we exclude 'host_receive.slx', because it causes non-recoverable hard crash during model simulation
+            %the 'Landing_Gear' models cause non-recoverable hard crashes during model saving
+            csvData = add_to_table(csvData, csvFile, {m, [model.folder filesep model.name], '', 0, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, '', '', '', '', '', '', NaN, NaN, NaN, '', ''}, m);
             continue
         end
 
@@ -51,9 +54,9 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
             
             copyfile(model_path, new_model_path)
             sys = load_system(new_model_path);
-            date = get_param(sys, 'LastModifiedDate');
+            date_bf = get_param(sys, 'LastModifiedDate');
             info = Simulink.MDLInfo(model_path);
-            SLversion = info.SimulinkVersion;
+            SLversion_bf = info.SimulinkVersion;
 
             %clean up model for taking accurate measurements:
             %delete DocBlocks
@@ -67,7 +70,7 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
             save_system(sys, new_model_path, 'SaveDirtyReferencedModels', 'on')
             bdclose('all')
             sys = load_system(new_model_path);
-            [blocks_bf, blocktypes_bf, signals_bf, subsystems_bf, cyclo_bf, SLversion_bf, date_bf, solver_bf, compilable_bf, output_data_bf] = compute_metrics(sys, metric_engine, date, SLversion, TMP_MODEL_SAVE_PATH);
+            [blocks_bf, blocktypes_bf, signals_bf, subsystems_bf, cyclo_bf, solver_bf, compilable_bf, output_data_bf] = compute_metrics(sys, metric_engine, TMP_MODEL_SAVE_PATH);
             bdclose('all')
             sys = load_system(new_model_path);
             loadable = 1;
@@ -85,8 +88,11 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
         try
             sys = try_save(new_model_path, model, sys);
             info = Simulink.MDLInfo(new_model_path);
-            SLversion = info.SimulinkVersion;            
-            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, metric_engine, datetime('now'), SLversion, TMP_MODEL_SAVE_PATH);
+            SLversion_af = info.SimulinkVersion;
+            date_af = datetime('now');
+            bdclose('all')
+            sys = load_system(new_model_path);
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, metric_engine, TMP_MODEL_SAVE_PATH);            
         catch ME
             %handle models with broken PreSaveFcn/PostSaveFcns
             s = get_param(sys, 'handle');
@@ -100,8 +106,11 @@ function csvData = runLoop(models, csvData, csvFile, TMP_MODEL_SAVE_PATH, args)
             end
             sys = try_save(new_model_path, model, sys);
             info = Simulink.MDLInfo(new_model_path);
-            SLversion = info.SimulinkVersion;
-            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, SLversion_af, date_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, metric_engine, datetime('now'), SLversion, TMP_MODEL_SAVE_PATH);
+            SLversion_af = info.SimulinkVersion;
+            date_af = datetime('now');
+            bdclose('all')
+            sys = load_system(new_model_path);
+            [blocks_af, blocktypes_af, signals_af, subsystems_af, cyclo_af, solver_af, compilable_af, output_data_af] = compute_metrics(sys, metric_engine, TMP_MODEL_SAVE_PATH);
         end
         [output_same, output_type_bf, output_type_af] = handle_outputs(output_data_bf, output_data_af);
         csvData = add_to_table(csvData, csvFile, {m, model_path, new_model_path, loadable, time, blocks_bf, blocks_af, blocktypes_bf, blocktypes_af, signals_bf, signals_af, subsystems_bf, subsystems_af, cyclo_bf, cyclo_af, SLversion_bf, SLversion_af, date_bf, date_af, solver_bf, solver_af, compilable_bf, compilable_af, output_same, output_type_bf, output_type_af}, m);
@@ -168,13 +177,8 @@ function [o_type, l] = output_type(o)
     end
 end
 
-function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solver, compilable, output_data] = compute_metrics(sys, metric_engine, date, SLversion, TMP_MODEL_SAVE_PATH)
-    blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
-    blocktypes = length(unique(get_param(blocks(2:end), 'BlockType')));
-    blocks = length(blocks);
-    signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line'));
-    subsystems = length(find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem'));
-
+function [blocks, blocktypes, signals, subsystems, cyclo, solver, compilable, output_data] = compute_metrics(sys, metric_engine, TMP_MODEL_SAVE_PATH)
+    [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH);
     setAnalysisRoot(metric_engine, 'Root', get_param(sys, 'Name'))
     execute(metric_engine, 'mathworks.metrics.CyclomaticComplexity');
     res_col = getMetrics(metric_engine, 'mathworks.metrics.CyclomaticComplexity');
@@ -183,13 +187,24 @@ function [blocks, blocktypes, signals, subsystems, cyclo, SLversion, date, solve
     else
         cyclo = -1;
     end
-    
+
+    blocks = find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants);
+    blocktypes = unique(get_param(blocks(2:end), 'BlockType'));
+    if ischar(blocktypes)
+        blocktypes = 1;
+    else
+        blocktypes = length(blocktypes);
+    end
+    blocks = length(blocks);
+    signals = length(find_system(sys, 'FindAll', 'on', 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'Type', 'Line'));
+    subsystems = length(find_system(sys, 'LookUnderMasks', 'all', 'MatchFilter', @Simulink.match.allVariants, 'BlockType', 'SubSystem'));
+
     try
         solver = get_param(sys, 'Solver');
     catch
         solver = 'unknown';
     end
-    [compilable, output_data] = compile_and_run(sys, TMP_MODEL_SAVE_PATH);
+    
 end
 
 
@@ -231,9 +246,10 @@ function output_data = get_output(sys)
             next_eval = evalin('base', [outputwatch num2str(o)]);
             output_data{end+1} = next_eval.Data(:);
         end
-    catch ME    
+    catch ME        
         output_data = NaN;
     end
+    set_param(sys, "SimulationCommand", "stop")
 end
 
 function find_and_connect_inputs(sys)
