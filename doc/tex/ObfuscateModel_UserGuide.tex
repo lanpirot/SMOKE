@@ -16,14 +16,15 @@
 \hypersetup{colorlinks,urlcolor=blue,linkcolor=blue}
 
 
+\usepackage{xspace}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Tool-Specific Macros
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \input{macros}
-
 \newcommand{\ToolName}{SMOKE: Simulink Model Obfuscation Keeping structurE\@\xspace}
 \newcommand{\toolname}{SMOKE\@\xspace}
-\newcommand{\location}{\file{SMOKEdir}\@\xspace}
+\newcommand{\Slocation}{\file{SMOKEdir}\@\xspace}
 
 \newcommand{\menu}[2]{%
 	\ifthenelse{\equal{#1}{1}}{SMOKEGUI}{}%
@@ -101,25 +102,25 @@ This section describes what must be done to setup the \toolname, as well as how 
 
 \begin{enumerate}
   \item Use \Matlab/\Simulink 2024a or newer. It may work with older versions, though.
-	\item To install the tool, use one of the following approaches to download all necessary files to a location, like \location of your choice:
+	\item To install the tool, use one of the following approaches to download all necessary files to a location, like \Slocation of your choice:
 	\begin{enumerate}
-		\item Download the \file{.zip} files of the \href{https://github.com/lanpirot/SMOKE}{\toolname repository} and for the dependency \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility}. Unzip both at \location.
-		\item Using a terminal at \location, clone the \toolname repository and its dependency: 
+		\item Download the \file{.zip} files of the \href{https://github.com/lanpirot/SMOKE}{\toolname repository} and for the dependency \href{https://github.com/McSCert/Simulink-Utility}{Simulink-Utility}. Unzip both at \Slocation.
+		\item Using a terminal at \Slocation, clone the \toolname repository and its dependency: 
 			\begin{verbatim}
 			git clone --recursive https://github.com/lanpirot/SMOKE
 			git clone --recursive https://github.com/McSCert/Simulink-Utility
 			\end{verbatim}
 	\end{enumerate}
-	\item Add the \location of \toolname and the dependency and all their subfolders to your \mpath. Do this step both for \toolname and Simulink-Utility! To do this, use one of the following:
+	\item Add the \Slocation of \toolname and the dependency and all their subfolders to your \mpath. Do this step both for \toolname and Simulink-Utility! To do this, use one of the following:
 	\begin{enumerate}
-		\item Use the \matlab current folder panel. Move to the location in the folder panel, then right-click on the folder $\longrightarrow$ Add to Path $\longrightarrow$ Selected Folders and Subfolders.
-		\item In the \matlab console, use \cmd{addpath(genpath('\location'))}
+		\item Use the \Matlab current folder panel. Move to the location in the folder panel, then right-click on the folder $\longrightarrow$ Add to Path $\longrightarrow$ Selected Folders and Subfolders.
+		\item In the \Matlab console, use \cmd{addpath(genpath('\Slocation'))}
 	\end{enumerate}
-	\item Finally, to keep the path saved for the next \matlab start, use \cmd{savepath} in the \matlab console.
-	\item Ensure your \simulink model, you want to obfuscate, is open and unlocked.
+	\item Finally, to keep the path saved for the next \Matlab start, use \cmd{savepath} in the \Matlab console.
+	\item Ensure your \Simulink model, you want to obfuscate, is open and unlocked.
 \end{enumerate}
 
-\paragraph{Troubleshooting:} If running the command ``\cmd{which SMOKEgui}'' indicates that the script is not found, or while executing the program \cmd{Unrecognized function or variable 'getInput'.} gets printed in the console, then \toolname and dependency directories needs to be added to the \mpath. For more information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
+\paragraph{Troubleshooting:} If running the command ``\cmd{which SMOKEgui}'' indicates that the script is not found, then \toolname and dependency directories needs to be added to the \mpath. If while executing the program \cmd{Unrecognized function or variable 'getInput'} gets printed in the console, then Simulink-Utility and dependency directories needs to be added to the \mpath. For more information on adding files to the \mpath, please see the \href{https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html}{MathWorks documentation}.
 
 %---------------------------------------
 % How/when do you access the tool?
@@ -144,6 +145,9 @@ This section describes the tool functionality when being used from the GUI (Figu
 \subsubsection{Model to be obfuscated}
 The top line states the currently loaded model (if any). If this is blank, ensure to load a Simulink model. Also make sure, that the model is unlocked, as \toolname only works on unlocked models.
 
+\subsubsection{Scope}
+Directly below the model's name, you can choose the scope of obfuscation and sanitization. By default the whole model will be affected by the user chosen transformations. You can also restrict \toolname to only anonymize the current SubSystem's content, or the current SubSystem and every element recursively nested within. This way, you may choose more restrictive anonymizations for some parts of the model, while others may be less obfuscated, or even be left in its original state.
+
 \subsubsection{Top Checkboxes}
 \begin{itemize}
 	\item Model References -- The use of a \href{https://www.mathworks.com/help/simulink/slref/model.html}{model} block introduces a reference to another model. This option resets all model reference blocks so that they no longer point to other models. \emph{Note: This may impact the model functionality.}
@@ -160,7 +164,8 @@ Here, functionality of the model will be removed, either inside of masks, block 
 	\item Dialog Parameters -- Blocks can have all kinds of \href{https://www.mathworks.com/help/simulink/slref/block-specific-parameters.html}{parameters} set. Activate this option to reset them to their default values. This means dialog parameters are a way to store constants in a model.
 	\item Constants -- Reset all \href{https://www.mathworks.com/help/simulink/slref/constant.html}{constants} to 1 values.
 	\item Functions -- Remove all MATLAB functions from \href{https://www.mathworks.com/help/simulink/ug/what-is-a-matlab-function-block.html}{MATLAB function blocks}. Inside of a function block, arbitrarily complex functions may be hidden.
-	\item Simulink Function Arguments -- A \simfunc can have inputs and outputs using \argin and \argout blocks. This option renames the \param{argument name} of \argin and \argout blocks to be generic (\eg u1 for an input, y1 for an output).
+	\item Simulink Function Arguments -- A \simfunc can have inputs and outputs using \argin and \argout blocks. This option renames the \param{argument name} of \argin and \argout blocks to be generic (e.g., u1 for an input, y1 for an output).
+	\item Implementation -- Beware: this removes \textit{everything} within the currently selected scope. The model structure will be affected by this.
 	
 	\item Stateflow -- These options rename the various named \href{https://www.mathworks.com/help/stateflow/ug/overview-of-stateflow-objects.html}{Stateflow elements} to have generic names. Currently inputs, outputs, events, boxes, and states are renamed. Transitions are removed.
 \end{itemize}
@@ -187,7 +192,7 @@ The options in the \emph{Right Panel} are of optical nature, only. Use this for 
 
 	\item Signal Names -- This option turns off \href{https://www.mathworks.com/help/simulink/ug/signal-label-propagation.html}{signal propagation}.
 
-\item Subsystem Content Preview -- This option turns off the \href{https://www.mathworks.com/help/simulink/ug/preview-content-of-hierarchical-items.html}{content preview} that is displayed in blocks such as subsystems.
+    \item Subsystem Content Preview -- This option turns off the \href{https://www.mathworks.com/help/simulink/ug/preview-content-of-hierarchical-items.html}{content preview} that is displayed in blocks such as subsystems.
 	
 	\item Subsystem Port Labels -- This option hides the port labels shown on blocks such as subsystems.
 	
@@ -200,6 +205,8 @@ The options in the \emph{Right Panel} are of optical nature, only. Use this for 
 	\item Simulink Function Names -- The trigger within a \simfunc specifies the function's name. This option renames it to a generic name (\eg f1), and updates any corresponding \simfunccaller blocks to match.
 	
 	\item Goto/From Tags -- A \goto block has a \param{goto tag} that matches it to its \from blocks. This option renames tags to generic names (\eg GotoFrom1) and renames any matching \from blocks as well.
+	
+	\item Squash Subsystems -- Every Subsystem in the scope will be removed. After this obfuscation, all the nested Subsystem content will be presented flatly, without any hierarchy. Note: This will change the model structure.
 	
 	\item Colors -- These options remove the colours of blocks and annotations so that they revert to their default color.
 

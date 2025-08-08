@@ -1,5 +1,5 @@
 function recurseModelReferences(sys, startsys, varargin)
-    refs = find_system(startsys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'Variants', 'AllVariants', 'BlockType', 'ModelReference');
+    refs = find_system(startsys, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'MatchFilte', @Simulink.match.allVariants, 'BlockType', 'ModelReference');
     if ~iscell(refs)
         refs = {refs};
     end
