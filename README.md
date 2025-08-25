@@ -12,6 +12,7 @@ Remove all sensitive IP from models with SMOKE!
 
 ## User Guide
 **TL;DR:**
+- watch our 5 minutes [YouTube walkthrough](https://youtu.be/0i42BzgJAUA)
 - Download this repository (SMOKE)
 - Download [Simulink Utility](https://github.com/McSCert/Simulink-Utility)
 - Add both SMOKE and Simulink Utility to your MATLAB path (click Selected folders and their subfolders)
