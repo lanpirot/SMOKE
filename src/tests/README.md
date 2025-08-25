@@ -1,5 +1,8 @@
 # How to Run Replication
 
+## Results
+The raw results will be saved to `results_scalability.csv`. We also provide a `SMOKE.xlsx` file with some further analysis used in our publication.
+
 ## Prerequisites
 - Download the 3.9GB dataset of Simulink projects [SLNET](https://zenodo.org/records/5259648). Unzip it at some `SLNET Location` on your computer. Unzip all project files within the subfolders, as well.
 - Download and install a recent MATLAB (we used MATLAB R2024b in our experiments). During the install check to download all available toolboxes for MATLAB, Simulink inclusive. If you have more toolboxes, models can get analyzed deeper and with less errors.
