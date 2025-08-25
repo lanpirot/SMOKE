@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/808521433.svg)](https://doi.org/10.5281/zenodo.16944786)
+
 # SMOKE: Simulink Model Obfuscation Keeping structurE
 
 The SMOKE Tool removes, renames, and/or hides various aspects of a Simulink model in order to hide confidential information. This can be useful for eliminating proprietary details when sending models to third-parties, or even by removing details from models in order to create simpler images suitable for publication. The SMOKE Tool can obfuscate (change layout, remove/hide names, remove colors, resize, rearrange diagrams etc.) and remove data and functionality (remove annotations, docblocks, functions from function blocks, stateflow innards, customized callbacks, all customized block parameters) while keeping the structure of the model intact. This way it can be shared while still being useful for structural analysis and/or screenshots that may be published.
