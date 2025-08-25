@@ -16,3 +16,6 @@ Remove all sensitive IP from models with SMOKE!
 - start SMOKE by running `src/SMOKEgui.mlapp`
 
 For more detailed installation and usage instructions, please refer to the [User Guide](doc/SMOKE_UserGuide.pdf).
+
+## Replication 
+For replication, see [the replication directory](https://github.com/lanpirot/SMOKE/tree/master/src/tests).
