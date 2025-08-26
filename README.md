@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/808521433.svg)](https://doi.org/10.5281/zenodo.16944786)
+[![DOI](https://zenodo.org/badge/808521433.svg)](https://doi.org/10.5281/zenodo.16944786) [![View SMOKE:Simulink Model Anonymizer on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://ch.mathworks.com/matlabcentral/fileexchange/181869-smoke-simulink-model-anonymizer)
 
 # SMOKE: Simulink Model Obfuscation Keeping structurE
 
